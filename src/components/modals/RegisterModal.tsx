@@ -164,10 +164,10 @@ export const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose })
 
       if (res.success) {
         setStep('success');
-        setSuccessMsg('Email berhasil diverifikasi! Akun Anda aktif dan siap digunakan.');
+        setSuccessMsg('Email berhasil diverifikasi! Pendaftaran akun Anda kini menunggu konfirmasi dari Akun Master (Super Admin).');
         setTimeout(() => {
           onClose();
-        }, 2000);
+        }, 3000);
       } else {
         setErrorMsg(res.message || 'Gagal mendaftarkan akun. Silakan coba kembali.');
       }
@@ -467,59 +467,26 @@ export const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose })
           {/* STEP 2: OTP Verification */}
           {step === 'otp' && (
             <form onSubmit={handleVerifyAndRegister} className="space-y-4">
-              <div className="p-3 bg-emerald-50 rounded-2xl border border-emerald-200 text-emerald-900 text-xs flex items-start gap-2.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-bold">Kode OTP Telah Dikirim ke Email!</span>
-                  <p className="text-[11px] text-emerald-800 mt-0.5">
-                    Masukkan 6 digit kode yang dikirim ke <strong className="font-mono">{email}</strong>.
+              <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-200 text-emerald-950 text-xs flex items-start gap-3 shadow-2xs">
+                <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
+                  <Mail className="w-5 h-5" />
+                </div>
+                <div className="space-y-1">
+                  <span className="font-bold text-emerald-900 block text-xs">
+                    Kode Verifikasi Telah Dikirim ke Email Anda
+                  </span>
+                  <p className="text-[11px] text-emerald-800 leading-relaxed">
+                    Sistem telah mengirimkan 6 digit kode OTP verifikasi ke alamat email <strong className="font-mono text-emerald-950">{email}</strong>.
+                  </p>
+                  <p className="text-[10px] text-emerald-700">
+                    Silakan buka <strong>Kotak Masuk (Inbox)</strong> atau folder <strong>Spam</strong> pada akun email Anda.
                   </p>
                 </div>
               </div>
 
-              {/* Interactive simulated Inbox */}
-              <div className="bg-slate-900 text-white rounded-2xl p-4 border border-slate-700 shadow-md space-y-3">
-                <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                  <div className="flex items-center gap-2">
-                    <Mail className="w-4 h-4 text-emerald-400" />
-                    <span className="text-xs font-bold text-white">
-                      Simulasi Kotak Masuk Email (Inbox)
-                    </span>
-                  </div>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono">
-                    Baru Masuk
-                  </span>
-                </div>
-
-                <div className="space-y-1 text-xs">
-                  <div className="text-[11px] text-slate-300">
-                    <span className="text-slate-400">Subjek:</span> <strong className="text-white">[SIPADES] Kode Verifikasi Pendaftaran Akun</strong>
-                  </div>
-                </div>
-
-                <div className="p-3 rounded-xl bg-black/40 border border-white/10 flex items-center justify-between">
-                  <div>
-                    <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">
-                      Kode Verifikasi OTP:
-                    </div>
-                    <div className="text-2xl font-black font-mono tracking-widest text-emerald-400 mt-0.5">
-                      {generatedOtp}
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleUseCodeDirectly}
-                    className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
-                  >
-                    {copiedOtp ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>{copiedOtp ? 'Terisi Otomatis' : 'Gunakan Kode'}</span>
-                  </button>
-                </div>
-              </div>
-
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Masukkan 6 Digit Kode OTP
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Masukkan 6 Digit Kode OTP dari Email
                 </label>
                 <input
                   type="text"
@@ -527,10 +494,13 @@ export const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose })
                   value={otpInput}
                   onChange={e => setOtpInput(e.target.value.replace(/\D/g, ''))}
                   placeholder="Contoh: 123456"
-                  className="w-full text-center tracking-widest font-mono text-xl font-bold py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500"
+                  className="w-full text-center tracking-widest font-mono text-2xl font-bold py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-hidden bg-slate-50/60 focus:bg-white"
                   required
                   autoFocus
                 />
+                <p className="text-[10px] text-slate-400 mt-1.5 text-center">
+                  Masukkan 6 angka yang Anda terima dari email resmi SIPADES.
+                </p>
               </div>
 
               <div className="flex items-center justify-between pt-1">
@@ -568,15 +538,15 @@ export const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose })
           {/* STEP 3: Sukses */}
           {step === 'success' && (
             <div className="py-6 text-center space-y-4 animate-in zoom-in-95">
-              <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto shadow-md">
+              <div className="w-16 h-16 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center mx-auto shadow-md">
                 <CheckCircle2 className="w-10 h-10" />
               </div>
               <div className="space-y-1">
                 <h4 className="text-base font-black text-slate-900">
-                  Akun Berhasil Aktif & Terverifikasi!
+                  Pendaftaran Berhasil & Email Terverifikasi!
                 </h4>
                 <p className="text-xs text-slate-600">
-                  Selamat, akun petugas untuk <strong>{name}</strong> ({username}) telah aktif dan siap digunakan.
+                  Akun untuk <strong>{name}</strong> (Username: <code>{username}</code>) telah dicatat dan saat ini <strong>MENUNGGU KONFIRMASI</strong> aktivasi oleh Akun Master (Super Admin).
                 </p>
               </div>
             </div>

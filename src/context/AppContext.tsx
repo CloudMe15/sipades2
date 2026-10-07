@@ -17,7 +17,7 @@ import {
 } from '../data/mockData';
 
 interface WaGatewayConfig {
-  provider: 'Simulasi Terpadu' | 'Fonnte WA Gateway' | 'Wablas API' | 'Twilio API';
+  provider: 'Fonnte WA Gateway' | 'Direct WA Gateway' | 'Wablas API' | 'Twilio API';
   apiKey: string;
   senderPhone: string;
   autoSendOnReady: boolean;
@@ -128,7 +128,7 @@ const STORAGE_KEYS = {
 };
 
 const DEFAULT_WA_CONFIG: WaGatewayConfig = {
-  provider: 'Simulasi Terpadu',
+  provider: 'Fonnte WA Gateway',
   apiKey: 'FONNTE_DEMO_KEY_RAKIT_KULIM_2026',
   senderPhone: '0857-1234-5678 (KANTOR PELAYANAN KEC. RAKIT KULIM)',
   autoSendOnReady: true,
@@ -334,38 +334,51 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const login = (usernameOrEmail: string, password?: string): { success: boolean; message?: string } => {
     const cleanInput = usernameOrEmail.trim().toLowerCase();
+    if (!cleanInput) {
+      return { success: false, message: 'Username atau email wajib diisi.' };
+    }
+
+    const inputPass = (password || '').trim();
+    if (!inputPass) {
+      return { success: false, message: 'Kata sandi (password) wajib diisi.' };
+    }
+
     const found = users.find(
       u => u.username.toLowerCase() === cleanInput || (u.email && u.email.toLowerCase() === cleanInput)
     );
     if (!found) {
-      return { success: false, message: 'Username atau kata sandi tidak cocok. Silakan periksa kembali akun Anda.' };
+      return { success: false, message: 'Akun dengan username atau email tersebut tidak ditemukan. Silakan periksa kembali.' };
     }
 
+    // Check account status
     if (found.status === 'pending') {
       return {
         success: false,
-        message: 'Akun Anda sedang menunggu verifikasi kode email atau konfirmasi persetujuan dari Administrator Master Kecamatan Rakit Kulim.'
+        message: 'Akun Anda sedang MENUNGGU KONFIRMASI persetujuan dari Akun Master (Super Admin). Silakan hubungi Super Admin untuk aktivasi akun Anda.'
       };
     }
 
     if (found.status === 'rejected') {
       return {
         success: false,
-        message: 'Pendaftaran akun Anda telah ditolak oleh Administrator Master. Silakan hubungi Kantor Pelayanan Kecamatan Rakit Kulim.'
+        message: 'Pendaftaran akun Anda telah ditolak oleh Akun Master. Silakan hubungi Administrator Kantor Kecamatan.'
       };
     }
 
     // Master account check: User Admin, password CloudMe
-    const isMasterMatch = (cleanInput === 'admin' || found.role === 'admin') && (password === 'CloudMe' || password === 'admin123');
-    const isMatch = !password || password === found.password || isMasterMatch || password === 'password123';
+    const isMasterAdmin = cleanInput === 'admin' || found.username.toLowerCase() === 'admin' || found.role === 'admin';
+    const isMasterPassMatch = isMasterAdmin && (inputPass === 'CloudMe' || inputPass === found.password);
 
-    if (isMatch) {
+    // Regular account password match
+    const isRegularPassMatch = inputPass === found.password;
+
+    if (isMasterPassMatch || isRegularPassMatch) {
       setCurrentUser(found);
       localStorage.setItem(STORAGE_KEYS.ACTIVE_USER, found.id);
       return { success: true };
     }
 
-    return { success: false, message: 'Kata sandi tidak sesuai. Silakan periksa kembali.' };
+    return { success: false, message: 'Kata sandi tidak sesuai. Silakan periksa kembali atau gunakan fitur Lupa Kata Sandi.' };
   };
 
   const logout = () => {
@@ -394,7 +407,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const newUser: CurrentUser = {
       ...newUserData,
       id: `user-${Date.now()}`,
-      status: isEmailVerified ? 'active' : 'pending',
+      status: 'pending', // Wajib menunggu konfirmasi dari Akun Master (Super Admin)
       emailVerified: isEmailVerified,
       registeredAt: new Date().toLocaleDateString('id-ID', {
         day: '2-digit',
@@ -420,9 +433,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     return {
       success: true,
-      message: isEmailVerified
-        ? 'Pendaftaran akun berhasil dan email terverifikasi aktif! Akun Anda dapat langsung digunakan untuk masuk.'
-        : 'Pendaftaran akun berhasil dikirim! Akun Anda kini menunggu verifikasi persetujuan dari Administrator Master.',
+      message: 'Pendaftaran akun berhasil dan email terverifikasi! Akun Anda sedang MENUNGGU KONFIRMASI aktivasi dari Akun Master (Super Admin).',
       user: newUser
     };
   };
@@ -446,6 +457,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       [clean]: { code, expiresAt, email: targetEmail },
       [targetEmail.toLowerCase()]: { code, expiresAt, email: targetEmail }
     }));
+
+    // Trigger real email dispatch via backend API
+    try {
+      await fetch('/api/users.php?action=send_otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: targetEmail, purpose: 'reset_password', code })
+      });
+    } catch (err) {
+      console.warn('Backend send_otp sync notice:', err);
+    }
 
     return {
       success: true,
@@ -522,6 +544,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ...prev,
       [clean]: { code, expiresAt }
     }));
+
+    // Trigger real email dispatch via backend API
+    try {
+      await fetch('/api/users.php?action=send_otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: clean, purpose: 'pendaftaran', code })
+      });
+    } catch (err) {
+      console.warn('Backend send_otp sync notice:', err);
+    }
+
     return {
       success: true,
       message: `Kode verifikasi pendaftaran berhasil dikirim ke ${clean}`,

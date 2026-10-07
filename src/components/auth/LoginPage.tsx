@@ -56,8 +56,8 @@ export const LoginPage: React.FC = () => {
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
 
   // Login form state
-  const [username, setUsername] = useState('operator');
-  const [password, setPassword] = useState('password123');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState('');
   const [loginSuccessMsg, setLoginSuccessMsg] = useState('');
@@ -70,8 +70,8 @@ export const LoginPage: React.FC = () => {
   const [regIdentifier, setRegIdentifier] = useState('Ketua RT 01 / RW 01');
   const [regPhone, setRegPhone] = useState('');
   const [regUsername, setRegUsername] = useState('');
-  const [regPassword, setRegPassword] = useState('password123');
-  const [regConfirmPassword, setRegConfirmPassword] = useState('password123');
+  const [regPassword, setRegPassword] = useState('');
+  const [regConfirmPassword, setRegConfirmPassword] = useState('');
   const [regAvatar, setRegAvatar] = useState('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80');
   const [regError, setRegError] = useState('');
   const [regSuccess, setRegSuccess] = useState('');
@@ -201,7 +201,7 @@ export const LoginPage: React.FC = () => {
 
       if (res.success) {
         setRegStep('success');
-        setRegSuccess('Selamat! Pendaftaran berhasil dan email Anda telah terverifikasi aktif.');
+        setRegSuccess('Pendaftaran berhasil & email telah diverifikasi! Akun Anda sedang MENUNGGU KONFIRMASI persetujuan dari Akun Master (Super Admin).');
       } else {
         setRegError(res.message);
       }
@@ -631,81 +631,20 @@ export const LoginPage: React.FC = () => {
                     )}
 
                     <form onSubmit={handleLoginSubmit} className="space-y-4">
-                      {/* Quick Login Chips for Ease of Access */}
-                      <div className="p-3 bg-gradient-to-r from-amber-50/80 via-slate-50 to-emerald-50/80 rounded-2xl border border-amber-200/60 space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
-                            <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                            <span>Akses Cepat Kredensial Akun:</span>
-                          </span>
-                          <span className="text-[10px] text-slate-400 font-mono">1-Klik Isi</span>
+                      {/* Security Notice */}
+                      <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                          <ShieldCheck className="w-4 h-4" />
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setUsername('Admin');
-                              setPassword('CloudMe');
-                              setLoginError('');
-                            }}
-                            className="p-1.5 rounded-xl bg-white hover:bg-amber-100 border border-amber-300 text-left cursor-pointer transition shadow-2xs group"
-                          >
-                            <div className="text-[10px] font-black text-amber-900 flex items-center gap-1">
-                              <span>👑 Akun Master</span>
-                            </div>
-                            <div className="text-[9px] text-slate-600 font-mono truncate">
-                              User: <strong className="text-slate-900">Admin</strong>
-                            </div>
-                            <div className="text-[9px] text-slate-500 font-mono truncate">
-                              Pass: <strong className="text-slate-900">CloudMe</strong>
-                            </div>
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setUsername('operator');
-                              setPassword('password123');
-                              setLoginError('');
-                            }}
-                            className="p-1.5 rounded-xl bg-white hover:bg-blue-100 border border-blue-200 text-left cursor-pointer transition shadow-2xs"
-                          >
-                            <div className="text-[10px] font-black text-blue-900 flex items-center gap-1">
-                              <span>🏛️ Operator Loket</span>
-                            </div>
-                            <div className="text-[9px] text-slate-600 font-mono truncate">
-                              User: <strong className="text-slate-900">operator</strong>
-                            </div>
-                            <div className="text-[9px] text-slate-500 font-mono truncate">
-                              Pass: <strong className="text-slate-900">password123</strong>
-                            </div>
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setUsername('rt01-kelayang');
-                              setPassword('password123');
-                              setLoginError('');
-                            }}
-                            className="p-1.5 rounded-xl bg-white hover:bg-emerald-100 border border-emerald-200 text-left cursor-pointer transition shadow-2xs"
-                          >
-                            <div className="text-[10px] font-black text-emerald-900 flex items-center gap-1">
-                              <span>🏢 Frontline RT</span>
-                            </div>
-                            <div className="text-[9px] text-slate-600 font-mono truncate">
-                              User: <strong className="text-slate-900">rt01-kelayang</strong>
-                            </div>
-                            <div className="text-[9px] text-slate-500 font-mono truncate">
-                              Pass: <strong className="text-slate-900">password123</strong>
-                            </div>
-                          </button>
+                        <div className="text-[11px] text-slate-600 leading-snug">
+                          <span className="font-bold text-slate-800 block">Sesi Privat & Terproteksi</span>
+                          Masuk dengan <strong>Username</strong> atau <strong>Email</strong> terdaftar yang telah dikonfirmasi oleh Akun Master.
                         </div>
                       </div>
 
                       <div>
                         <label className="block text-xs font-semibold text-slate-700 mb-1">
-                          Username / Email Petugas
+                          Username atau Email Petugas *
                         </label>
                         <div className="relative">
                           <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
@@ -713,11 +652,14 @@ export const LoginPage: React.FC = () => {
                             type="text"
                             value={username}
                             onChange={e => setUsername(e.target.value)}
-                            placeholder="Contoh: Admin atau operator"
+                            placeholder="Masukkan username atau email Anda"
                             className="w-full pl-9 pr-3 py-2.5 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                             required
                           />
                         </div>
+                        <p className="text-[10px] text-slate-400 mt-1">
+                          Untuk Akun Master gunakan Username: <strong>Admin</strong>.
+                        </p>
                       </div>
 
                       <div>
@@ -1063,63 +1005,27 @@ export const LoginPage: React.FC = () => {
                     {/* Step B: Verifikasi Kode OTP Email */}
                     {regStep === 'otp' && (
                       <form onSubmit={handleVerifyRegistrationOtp} className="space-y-4">
-                        <div className="p-3 bg-emerald-50 rounded-2xl border border-emerald-200 text-emerald-900 text-xs flex items-start gap-2.5">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                          <div>
-                            <span className="font-bold">Kode Verifikasi Telah Dikirim!</span>
-                            <p className="text-[11px] text-emerald-800 mt-0.5">
-                              Sistem telah mengirimkan 6 digit kode OTP aktivasi ke email <strong className="font-mono">{regEmail}</strong>.
-                            </p>
+                        <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-200 text-emerald-950 text-xs flex items-start gap-3 shadow-2xs">
+                          <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
+                            <Mail className="w-5 h-5" />
                           </div>
-                        </div>
-
-                        {/* Interactive Email Inbox Simulation */}
-                        <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 text-white rounded-2xl p-4 border border-slate-700 shadow-md space-y-3">
-                          <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                            <div className="flex items-center gap-2">
-                              <Mail className="w-4 h-4 text-emerald-400" />
-                              <span className="text-xs font-bold text-white">
-                                Simulasi Kotak Masuk Email (Inbox)
-                              </span>
-                            </div>
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono">
-                              Baru Masuk
+                          <div className="space-y-1">
+                            <span className="font-bold text-emerald-900 block text-xs">
+                              Kode Verifikasi Telah Dikirim ke Email Anda
                             </span>
-                          </div>
-
-                          <div className="space-y-1 text-xs">
-                            <div className="text-[11px] text-slate-300">
-                              <span className="text-slate-400">Dari:</span> <span className="text-slate-200">noreply-sipades@rakitkulim.desa.id</span>
-                            </div>
-                            <div className="text-[11px] text-slate-300">
-                              <span className="text-slate-400">Subjek:</span> <strong className="text-white">[SIPADES] Kode Verifikasi Pendaftaran Akun</strong>
-                            </div>
-                          </div>
-
-                          <div className="p-3 rounded-xl bg-black/40 border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
-                            <div>
-                              <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">
-                                Kode Verifikasi OTP Pendaftaran:
-                              </div>
-                              <div className="text-2xl font-black font-mono tracking-widest text-emerald-400 mt-0.5">
-                                {regGeneratedOtp}
-                              </div>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={handleUseRegCodeDirectly}
-                              className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm cursor-pointer"
-                            >
-                              {regCopiedOtp ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                              <span>{regCopiedOtp ? 'Kode Terisi!' : 'Gunakan Kode Ini'}</span>
-                            </button>
+                            <p className="text-[11px] text-emerald-800 leading-relaxed">
+                              Sistem telah mengirimkan 6 digit kode OTP aktivasi ke alamat email <strong className="font-mono text-emerald-950">{regEmail}</strong>.
+                            </p>
+                            <p className="text-[10px] text-emerald-700">
+                              Silakan periksa <strong>Kotak Masuk (Inbox)</strong> atau folder <strong>Spam</strong> pada akun email Anda.
+                            </p>
                           </div>
                         </div>
 
                         {/* Input 6 Digit OTP */}
                         <div>
                           <label className="block text-xs font-semibold text-slate-700 mb-1">
-                            Masukkan 6 Digit Kode OTP Pendaftaran
+                            Masukkan 6 Digit Kode OTP dari Email
                           </label>
                           <input
                             type="text"
@@ -1127,10 +1033,13 @@ export const LoginPage: React.FC = () => {
                             value={regOtpInput}
                             onChange={e => setRegOtpInput(e.target.value.replace(/\D/g, ''))}
                             placeholder="Contoh: 123456"
-                            className="w-full text-center tracking-widest font-mono text-xl font-bold py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
+                            className="w-full text-center tracking-widest font-mono text-2xl font-bold py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-hidden bg-slate-50/60 focus:bg-white"
                             required
                             autoFocus
                           />
+                          <p className="text-[10px] text-slate-400 mt-1.5 text-center">
+                            Masukkan 6 angka yang Anda terima dari email resmi SIPADES.
+                          </p>
                         </div>
 
                         <div className="flex items-center justify-between pt-1">
@@ -1157,7 +1066,7 @@ export const LoginPage: React.FC = () => {
                               disabled={isSubmittingReg}
                               className="px-5 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 disabled:bg-slate-400 text-white text-xs font-bold transition shadow-md cursor-pointer flex items-center gap-1.5"
                             >
-                              <span>{isSubmittingReg ? 'Memverifikasi...' : 'Verifikasi & Aktifkan Akun'}</span>
+                              <span>{isSubmittingReg ? 'Memverifikasi...' : 'Verifikasi & Lanjutkan'}</span>
                               <CheckCircle2 className="w-4 h-4" />
                             </button>
                           </div>
@@ -1165,34 +1074,60 @@ export const LoginPage: React.FC = () => {
                       </form>
                     )}
 
-                    {/* Step C: Sukses Terdaftar & Terverifikasi Aktif */}
+                    {/* Step C: Pendaftaran Berhasil & Menunggu Persetujuan Akun Master */}
                     {regStep === 'success' && (
                       <div className="py-6 text-center space-y-4 animate-in zoom-in-95">
-                        <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto shadow-md">
-                          <CheckCircle2 className="w-10 h-10" />
+                        <div className="w-16 h-16 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center mx-auto shadow-md ring-4 ring-amber-50">
+                          <Clock className="w-8 h-8" />
                         </div>
-                        <div className="space-y-1">
+                        <div className="space-y-1.5">
                           <h4 className="text-base font-black text-slate-900">
-                            Pendaftaran Berhasil & Akun Aktif!
+                            Pendaftaran Berhasil & Email Terverifikasi!
                           </h4>
-                          <p className="text-xs text-slate-600 max-w-sm mx-auto">
-                            Email <strong className="text-slate-800">{regEmail}</strong> telah diverifikasi aktif. Akun petugas <strong className="text-slate-800">{regName}</strong> ({regUsername}) sekarang siap digunakan.
+                          <p className="text-xs text-slate-600 max-w-md mx-auto">
+                            Kode OTP email telah valid. Berdasarkan kebijakan sistem, akun baru memerlukan konfirmasi dari Akun Master.
                           </p>
                         </div>
+
+                        {/* Account Credential Summary Card */}
+                        <div className="max-w-md mx-auto bg-slate-50 border border-slate-200 rounded-2xl p-4 text-left text-xs space-y-2">
+                          <div className="flex justify-between items-center py-1 border-b border-slate-200">
+                            <span className="text-slate-500">Nama Petugas:</span>
+                            <span className="font-bold text-slate-900">{regName}</span>
+                          </div>
+                          <div className="flex justify-between items-center py-1 border-b border-slate-200">
+                            <span className="text-slate-500">Username untuk Login:</span>
+                            <span className="font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">{regUsername}</span>
+                          </div>
+                          <div className="flex justify-between items-center py-1 border-b border-slate-200">
+                            <span className="text-slate-500">Email Terdaftar:</span>
+                            <span className="font-mono text-slate-800">{regEmail}</span>
+                          </div>
+                          <div className="flex justify-between items-center py-1">
+                            <span className="text-slate-500">Status Akun:</span>
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-100 text-amber-900 border border-amber-300">
+                              MENUNGGU KONFIRMASI AKUN MASTER
+                            </span>
+                          </div>
+                        </div>
+
+                        <p className="text-[11px] text-slate-500 max-w-sm mx-auto leading-relaxed">
+                          Akun Master (Super Admin) akan memeriksa pendaftaran Anda. Setelah disetujui, Anda dapat langsung masuk menggunakan <strong>Username</strong> atau <strong>Email</strong> di atas.
+                        </p>
 
                         <div className="pt-2">
                           <button
                             type="button"
                             onClick={() => {
                               setUsername(regUsername);
-                              setPassword(regPassword);
+                              setPassword('');
                               setAuthMode('login');
                               setRegStep('form');
                               setLoginError('');
                             }}
-                            className="w-full py-3 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold transition shadow-md cursor-pointer flex items-center justify-center gap-2"
+                            className="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-md cursor-pointer flex items-center justify-center gap-2"
                           >
-                            <span>Masuk ke Dashboard Sekarang</span>
+                            <span>Kembali ke Halaman Masuk</span>
                             <ArrowRight className="w-4 h-4" />
                           </button>
                         </div>
@@ -1230,21 +1165,6 @@ export const LoginPage: React.FC = () => {
                   <p className="text-xs text-slate-300 leading-relaxed">
                     Setiap <strong>Ketua RT</strong> di 19 Desa se-Kecamatan Rakit Kulim dapat menginput permohonan warga langsung dari rumah. Data dan berkas otomatis terhubung ke komputer <strong>Operator Kantor Desa</strong> secara realtime.
                   </p>
-
-                  <div className="pt-2 border-t border-white/10 space-y-2 text-xs text-slate-300">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                      <span>Tersinkronisasi database MySQL / MariaDB</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                      <span>Notifikasi WhatsApp otomatis ke warga</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                      <span>Monitoring SLA Kinerja tingkat Kecamatan</span>
-                    </div>
-                  </div>
                 </div>
 
                 {/* Info Wilayah */}

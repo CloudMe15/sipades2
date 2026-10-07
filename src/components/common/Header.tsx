@@ -130,26 +130,6 @@ export const Header: React.FC = () => {
 
             {/* Right Action Section */}
             <div className="flex items-center gap-2 sm:gap-3">
-              {/* MySQL Live Sync Status */}
-              <button
-                onClick={() => forceSync()}
-                disabled={isSyncing}
-                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold border transition shadow-2xs cursor-pointer ${
-                  isSyncing
-                    ? 'bg-amber-50 text-amber-800 border-amber-300'
-                    : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-200'
-                }`}
-                title="Sinkronisasi Live Database MySQL (Polling otomatis tiap 3 detik)"
-              >
-                <RefreshCw
-                  className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin text-amber-600' : 'text-emerald-600'}`}
-                />
-                <span className="hidden md:inline">
-                  {isSyncing ? 'Menyinkron...' : 'MySQL Live'}
-                </span>
-                <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
-              </button>
-
               {/* Live Clock */}
               <div className="hidden lg:flex items-center gap-1.5 text-xs font-mono text-slate-500 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-200">
                 <Clock className="w-3.5 h-3.5 text-slate-400" />
@@ -167,20 +147,6 @@ export const Header: React.FC = () => {
                 <span className="px-1.5 py-0.2 rounded-full bg-emerald-600 text-white text-[10px] font-bold">
                   {waLogs.length}
                 </span>
-              </button>
-
-              {/* Reset Sample Data Button */}
-              <button
-                onClick={() => {
-                  if (window.confirm('Reset data ke kondisi awal Kecamatan Rakit Kulim?')) {
-                    resetToSampleData();
-                  }
-                }}
-                className="p-1.5 sm:px-2 sm:py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-medium border border-slate-200 transition-colors cursor-pointer flex items-center gap-1"
-                title="Reset Data ke Kondisi Awal Rakit Kulim"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span className="hidden xl:inline">Reset Data</span>
               </button>
 
               {/* Master Admin: Persetujuan Akun */}
@@ -220,7 +186,7 @@ export const Header: React.FC = () => {
                 <span className="hidden md:inline">Keluar</span>
               </button>
 
-              {/* Role Switcher Menu */}
+              {/* User Account Menu (Private to logged in user) */}
               <div className="relative">
                 <button
                   onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -249,71 +215,91 @@ export const Header: React.FC = () => {
                       className="fixed inset-0 z-40"
                       onClick={() => setDropdownOpen(false)}
                     />
-                    <div className="absolute right-0 mt-2 w-72 sm:w-80 max-w-[calc(100vw-1.5rem)] rounded-xl bg-white border border-slate-200 shadow-xl z-50 p-2 animate-in fade-in slide-in-from-top-2 duration-150">
-                      {/* Edit Profile Quick Trigger inside dropdown */}
-                      <div className="p-2 border-b border-slate-100 mb-1">
+                    <div className="absolute right-0 mt-2 w-72 sm:w-80 max-w-[calc(100vw-1.5rem)] rounded-2xl bg-white border border-slate-200 shadow-xl z-50 p-3 animate-in fade-in slide-in-from-top-2 duration-150">
+                      {/* Current User Card */}
+                      <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 mb-2">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={currentUser.avatar}
+                            alt={currentUser.name}
+                            className="w-10 h-10 rounded-full object-cover ring-2 ring-emerald-500/30"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div className="text-xs font-bold text-slate-900 truncate">
+                              {currentUser.name}
+                            </div>
+                            <div className="text-[11px] text-slate-500 truncate">
+                              @{currentUser.username}
+                            </div>
+                            <div className="mt-1">
+                              <span className={`inline-block text-[9px] px-2 py-0.5 rounded-md border font-bold ${badge.color}`}>
+                                {badge.label}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="mt-2.5 pt-2 border-t border-slate-200/60 text-[11px] text-slate-600 space-y-1">
+                          <div className="flex justify-between">
+                            <span className="text-slate-400">Wilayah:</span>
+                            <span className="font-semibold text-slate-800">{currentUser.village}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-slate-400">Jabatan:</span>
+                            <span className="font-semibold text-slate-800">{currentUser.identifier}</span>
+                          </div>
+                          {currentUser.email && (
+                            <div className="flex justify-between">
+                              <span className="text-slate-400">Email:</span>
+                              <span className="font-mono text-slate-800 text-[10px] truncate max-w-[160px]">{currentUser.email}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Action buttons */}
+                      <div className="space-y-1.5">
+                        {currentUser.role === 'admin' && (
+                          <button
+                            onClick={() => {
+                              setAdminApprovalModalOpen(true);
+                              setDropdownOpen(false);
+                            }}
+                            className="w-full py-2 px-3 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-bold transition flex items-center justify-between cursor-pointer border border-amber-200 shadow-2xs"
+                          >
+                            <span className="flex items-center gap-2">
+                              <ShieldCheck className="w-4 h-4 text-amber-700" />
+                              <span>Panel Persetujuan Akun</span>
+                            </span>
+                            {users.filter(u => u.status === 'pending').length > 0 && (
+                              <span className="px-1.5 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-black">
+                                {users.filter(u => u.status === 'pending').length}
+                              </span>
+                            )}
+                          </button>
+                        )}
+
                         <button
                           onClick={() => {
                             setProfileModalOpen(true);
                             setDropdownOpen(false);
                           }}
-                          className="w-full py-2 px-3 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-2xs border border-emerald-200"
+                          className="w-full py-2 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold transition flex items-center gap-2 cursor-pointer border border-emerald-200 shadow-2xs"
                         >
-                          <Edit3 className="w-3.5 h-3.5" />
-                          <span>Edit Profil, Foto & Jabatan</span>
+                          <Edit3 className="w-4 h-4 text-emerald-700" />
+                          <span>Edit Profil & Ubah Password</span>
                         </button>
-                      </div>
 
-                      <div className="px-3 py-1.5 border-b border-slate-100 mb-1">
-                        <div className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
-                          Ganti Sesi Akun (RBAC)
-                        </div>
-                        <div className="text-xs text-slate-500 mt-0.5">
-                          Tersedia akun RT se-Kecamatan Rakit Kulim:
-                        </div>
-                      </div>
-
-                      <div className="space-y-1 max-h-80 overflow-y-auto pr-1">
-                        {users.map(u => {
-                          const isCurrent = u.id === currentUser.id;
-                          const roleMeta = getRoleBadge(u.role);
-                          return (
-                            <button
-                              key={u.id}
-                              onClick={() => {
-                                switchUserById(u.id);
-                                setDropdownOpen(false);
-                              }}
-                              className={`w-full flex items-center gap-3 p-2 rounded-lg text-left transition-colors cursor-pointer ${
-                                isCurrent
-                                  ? 'bg-emerald-50/80 border border-emerald-200/60'
-                                  : 'hover:bg-slate-50'
-                              }`}
-                            >
-                              <img
-                                src={u.avatar}
-                                alt={u.name}
-                                className="w-8 h-8 rounded-full object-cover shrink-0"
-                              />
-                              <div className="flex-1 min-w-0">
-                                <div className="text-xs font-bold text-slate-900 truncate">
-                                  {u.name}
-                                </div>
-                                <div className="text-[11px] text-slate-500 truncate">
-                                  {u.identifier} • {u.village}
-                                </div>
-                                <span
-                                  className={`inline-block mt-0.5 text-[9px] px-1.5 py-0.2 rounded border font-medium ${roleMeta.color}`}
-                                >
-                                  {roleMeta.label}
-                                </span>
-                              </div>
-                              {isCurrent && (
-                                <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                              )}
-                            </button>
-                          );
-                        })}
+                        <button
+                          onClick={() => {
+                            setDropdownOpen(false);
+                            logout();
+                          }}
+                          className="w-full py-2 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition flex items-center gap-2 cursor-pointer border border-rose-200 shadow-2xs"
+                        >
+                          <LogOut className="w-4 h-4 text-rose-600" />
+                          <span>Keluar dari Akun</span>
+                        </button>
                       </div>
                     </div>
                   </>

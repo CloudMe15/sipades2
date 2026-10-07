@@ -173,5 +173,5 @@ VALUES
 ('user-kecamatan', 'kasi', 'password123', 'paten@rakitkulim.inhukab.go.id', 'Drs. H. Suryana, M.Si', 'kecamatan', 'Kasi Tata Pemerintahan & PATEN', 'Kecamatan Rakit Kulim, Kab. Inhu', 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&auto=format&fit=crop&q=80', '0811-2233-4455'),
 
 -- Super Admin Master (Pemerintah Kecamatan Rakit Kulim)
-('user-superadmin', 'admin', 'password123', 'admin.master@rakitkulim.inhukab.go.id', 'Administrator Master PATEN', 'admin', 'Super Admin Kecamatan Rakit Kulim', 'Kecamatan Rakit Kulim, Kab. Inhu', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80', '0812-9988-7766')
-ON DUPLICATE KEY UPDATE `name`=VALUES(`name`), `identifier`=VALUES(`identifier`), `village`=VALUES(`village`);
+('user-superadmin', 'admin', 'CloudMe', 'admin.master@rakitkulim.inhukab.go.id', 'Administrator Master PATEN', 'admin', 'Super Admin Kecamatan Rakit Kulim', 'Kecamatan Rakit Kulim, Kab. Inhu', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80', '0812-9988-7766')
+ON DUPLICATE KEY UPDATE `password`=VALUES(`password`), `name`=VALUES(`name`), `identifier`=VALUES(`identifier`), `village`=VALUES(`village`);

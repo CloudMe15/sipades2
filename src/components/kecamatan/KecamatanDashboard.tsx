@@ -14,15 +14,19 @@ import {
   TrendingUp,
   CheckCircle2,
   PieChart,
-  ArrowUpRight
+  ArrowUpRight,
+  ShieldCheck,
+  UserCheck
 } from 'lucide-react';
 
 export const KecamatanDashboard: React.FC = () => {
-  const { villageStats, requests, currentUser } = useApp();
+  const { villageStats, requests, currentUser, users, setAdminApprovalModalOpen } = useApp();
 
   const [selectedVillage, setSelectedVillage] = useState<string>('all');
   const [selectedMonth, setSelectedMonth] = useState('Oktober 2026');
   const [reportModalOpen, setReportModalOpen] = useState(false);
+
+  const pendingUsers = users.filter(u => u.status === 'pending');
 
   // Aggregated totals
   const totalSubmissions = villageStats.reduce((sum, v) => sum + v.totalRequests, 0);
@@ -73,6 +77,45 @@ export const KecamatanDashboard: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Super Admin Master Account Management Banner */}
+      {currentUser?.role === 'admin' && (
+        <div className="bg-gradient-to-r from-amber-50 via-amber-100/60 to-orange-50 border-2 border-amber-300 rounded-2xl p-5 shadow-sm flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-md shrink-0">
+              <ShieldCheck className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-amber-800">
+                  👑 Akses Akun Master (Super Admin)
+                </span>
+                {pendingUsers.length > 0 && (
+                  <span className="px-2 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-black animate-pulse">
+                    {pendingUsers.length} Pendaftaran Menunggu
+                  </span>
+                )}
+              </div>
+              <h3 className="text-sm sm:text-base font-black text-slate-900 mt-0.5">
+                Panel Persetujuan & Konfirmasi Akun Petugas Desa / RT
+              </h3>
+              <p className="text-xs text-slate-600 mt-0.5">
+                {pendingUsers.length > 0
+                  ? `Terdapat ${pendingUsers.length} akun baru yang telah memverifikasi email dan menunggu persetujuan Anda untuk dapat masuk ke sistem.`
+                  : 'Semua akun aparatur telah disetujui. Setiap akun baru yang mendaftar akan muncul di panel ini untuk konfirmasi.'}
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setAdminApprovalModalOpen(true)}
+            className="px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition flex items-center gap-2 shadow-md cursor-pointer shrink-0"
+          >
+            <UserCheck className="w-4 h-4" />
+            <span>Buka Panel Persetujuan Akun</span>
+          </button>
+        </div>
+      )}
 
       {/* Top SLA & Key Performance Indicator Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

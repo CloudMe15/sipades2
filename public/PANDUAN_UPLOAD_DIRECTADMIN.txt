@@ -1,0 +1,66 @@
+================================================================================
+  PANDUAN UPLOAD & DEPLOYMENT SIPADES KE HOSTING DIRECTADMIN / CPANEL
+  Kecamatan Rakit Kulim, Kabupaten Indragiri Hulu, Riau
+================================================================================
+
+Website SIPADES telah selesai dibangun dan siap dipublikasikan ke server hosting!
+Ikuti 3 langkah mudah berikut ini untuk menayangkan website:
+
+--------------------------------------------------------------------------------
+LANGKAH 1: UPLOAD FILE KE PUBLIC_HTML
+--------------------------------------------------------------------------------
+1. Login ke panel DirectAdmin (atau cPanel) Anda.
+2. Buka menu "File Manager" (Pengelola Berkas).
+3. Masuk ke folder root website: "domains/desasukamaju.my.id/public_html/"
+   (atau langsung ke folder "public_html/").
+4. Upload file ZIP ini: "sipades_siap_hosting.zip" (atau "dist.zip").
+5. Klik kanan pada file ZIP tersebut di File Manager, lalu pilih "Extract" (Ekstrak).
+6. Pastikan file-file berikut berada langsung di dalam folder public_html:
+   - index.html
+   - .htaccess
+   - database.sql
+   - assets/ (folder CSS dan JS)
+   - api/ (folder skrip PHP koneksi database)
+   - uploads/ (folder penyimpanan dokumen KTP/KK)
+7. Pastikan folder "uploads" memiliki izin akses (permission) 755 atau 777 agar berkas permohonan warga bisa diupload.
+
+--------------------------------------------------------------------------------
+LANGKAH 2: IMPORT DATABASE DI PHPMYADMIN
+--------------------------------------------------------------------------------
+1. Di panel DirectAdmin, buka menu "Databases (MySQL Management)".
+2. Pastikan database, username, dan password Anda sudah dibuat:
+   - Nama Database: desasuka_sipades
+   - User Database: desasuka_sipades
+   - Password:      Sipades2026!#
+   *(Kredensial ini sudah otomatis tertanam di file api/config.php)*
+3. Klik ikon atau tautan "phpMyAdmin".
+4. Di panel sebelah kiri phpMyAdmin, klik nama database Anda: "desasuka_sipades".
+5. Klik tab "Import" di bilah menu bagian atas.
+6. Klik tombol "Choose File" / "Pilih Berkas", lalu pilih file "database.sql" yang ada di dalam folder website Anda.
+7. Gulir ke bawah dan klik tombol "Import" / "Go".
+8. Sukses! Semua tabel (users, requests, attachments, timelines, wa_logs) dan akun master akan otomatis terpasang rapi.
+
+--------------------------------------------------------------------------------
+LANGKAH 3: PENGUJIAN & MASUK KE SISTEM
+--------------------------------------------------------------------------------
+1. Buka browser dan buka halaman uji coba koneksi:
+   https://desasukamaju.my.id/api/test_db.php
+   Halaman ini akan langsung memverifikasi apakah database MySQL Anda sudah online (terhubung).
+
+2. Buka halaman utama website:
+   https://desasukamaju.my.id/
+   
+3. Login sebagai Akun Master (Super Admin):
+   - Username: Admin
+   - Password: CloudMe
+   
+   Super Admin memiliki kontrol penuh untuk menyetujui akun petugas baru yang mendaftar secara mandiri melalui "Panel Persetujuan Akun".
+
+4. Akun Default Lainnya:
+   - Operator Kantor Desa: User: operator    | Pass: password123
+   - Frontline RT 01:       User: rt01-kelayang | Pass: password123
+   - Monitoring Kecamatan:  User: kasi        | Pass: password123
+
+================================================================================
+SIPADES Kec. Rakit Kulim Siap Digunakan Melayani Warga 19 Desa!
+================================================================================

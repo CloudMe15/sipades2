@@ -16,12 +16,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 // ========================================================
 // PENGATURAN KREDENSIAL DATABASE MYSQL / MARIADB
-// Sesuaikan dengan database yang Anda buat di cPanel / DirectAdmin
+// DirectAdmin Hosting: desasukamaju.my.id (Hostdata.id)
 // ========================================================
 $DB_HOST = 'localhost';
-$DB_NAME = 'rakitkulim_sipades'; // Nama database di phpMyAdmin
-$DB_USER = 'rakitkulim_user';    // Username database di hosting
-$DB_PASS = 'password_db_anda';  // Password database di hosting
+$DB_NAME = 'desasuka_sipades'; // Nama database di DirectAdmin
+$DB_USER = 'desasuka_sipades'; // Username database di DirectAdmin
+$DB_PASS = 'Sipades2026!#';    // Password database DirectAdmin Hostdata.id
 
 // Cek apakah ada file override config local
 $configFile = __DIR__ . '/db_credentials.php';

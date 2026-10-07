@@ -311,66 +311,30 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({ onSucces
             </form>
           )}
 
-          {/* STEP 2: Masukkan Kode OTP & Kotak Masuk Simulasi */}
+          {/* STEP 2: Masukkan Kode OTP dari Email */}
           {step === 2 && (
             <form onSubmit={handleVerifyOtp} className="space-y-4">
-              <div className="p-3 bg-emerald-50 rounded-2xl border border-emerald-200 text-emerald-900 text-xs flex items-start gap-2.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-bold">Kode Verifikasi Telah Dikirim!</span>
-                  <p className="text-[11px] text-emerald-800 mt-0.5">
-                    Sistem telah mengirimkan 6 digit kode OTP ke email <strong className="font-mono">{targetEmail}</strong>.
-                  </p>
+              <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-200 text-emerald-950 text-xs flex items-start gap-3 shadow-2xs">
+                <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
+                  <Mail className="w-5 h-5" />
                 </div>
-              </div>
-
-              {/* SIMULASI INBOX EMAIL INTERAKTIF */}
-              <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-white rounded-2xl p-4 border border-slate-700 shadow-md space-y-3">
-                <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                  <div className="flex items-center gap-2">
-                    <Mail className="w-4 h-4 text-emerald-400" />
-                    <span className="text-xs font-bold tracking-tight text-white">
-                      Simulasi Kotak Masuk Email (Inbox)
-                    </span>
-                  </div>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono">
-                    Baru Saja
+                <div className="space-y-1">
+                  <span className="font-bold text-emerald-900 block text-xs">
+                    Kode Verifikasi Telah Dikirim ke Email Anda
                   </span>
-                </div>
-
-                <div className="space-y-1 text-xs">
-                  <div className="text-[11px] text-slate-300">
-                    <span className="text-slate-400">Dari:</span> <span className="text-slate-200">noreply-sipades@rakitkulim.desa.id</span>
-                  </div>
-                  <div className="text-[11px] text-slate-300">
-                    <span className="text-slate-400">Subjek:</span> <strong className="text-white">[SIPADES] Kode Verifikasi Reset Kata Sandi</strong>
-                  </div>
-                </div>
-
-                <div className="p-3 rounded-xl bg-black/40 border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
-                  <div>
-                    <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">
-                      Kode Verifikasi OTP Anda:
-                    </div>
-                    <div className="text-2xl font-black font-mono tracking-widest text-emerald-400 mt-0.5">
-                      {generatedCode}
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleUseCodeDirectly}
-                    className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm cursor-pointer"
-                  >
-                    {copiedCode ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>{copiedCode ? 'Terisi Otomatis!' : 'Gunakan Kode Ini'}</span>
-                  </button>
+                  <p className="text-[11px] text-emerald-800 leading-relaxed">
+                    Sistem telah mengirimkan 6 digit kode OTP reset kata sandi ke alamat email <strong className="font-mono text-emerald-950">{targetEmail}</strong>.
+                  </p>
+                  <p className="text-[10px] text-emerald-700">
+                    Silakan buka <strong>Kotak Masuk (Inbox)</strong> atau folder <strong>Spam</strong> pada akun email Anda.
+                  </p>
                 </div>
               </div>
 
               {/* Input OTP */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Masukkan 6 Digit Kode Verifikasi (OTP)
+                  Masukkan 6 Digit Kode OTP dari Email
                 </label>
                 <div className="relative">
                   <input
@@ -379,11 +343,14 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({ onSucces
                     value={inputOtp}
                     onChange={e => setInputOtp(e.target.value.replace(/\D/g, ''))}
                     placeholder="Contoh: 123456"
-                    className="w-full text-center tracking-widest font-mono text-xl font-bold py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
+                    className="w-full text-center tracking-widest font-mono text-2xl font-bold py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-hidden bg-slate-50/60 focus:bg-white"
                     required
                     autoFocus
                   />
                 </div>
+                <p className="text-[10px] text-slate-400 mt-1.5 text-center">
+                  Masukkan 6 angka yang Anda terima dari email SIPADES.
+                </p>
               </div>
 
               <div className="flex items-center justify-between pt-1">

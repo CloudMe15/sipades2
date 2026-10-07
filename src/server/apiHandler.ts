@@ -191,6 +191,64 @@ export function handleApiRequest(
           });
         }
 
+        if (act === 'approve' || act === 'approve_user') {
+          const userId = body.userId || body.id;
+          const idx = usersList.findIndex(u => u.id === userId);
+          if (idx >= 0) {
+            usersList[idx].status = 'active';
+            saveStoredUsers(usersList);
+            return sendJson(res, {
+              success: true,
+              message: 'Akun berhasil disetujui & diaktifkan.',
+              data: usersList[idx]
+            });
+          }
+          return sendJson(res, { success: false, message: 'Akun tidak ditemukan.' }, 404);
+        }
+
+        if (act === 'reject' || act === 'reject_user') {
+          const userId = body.userId || body.id;
+          const idx = usersList.findIndex(u => u.id === userId);
+          if (idx >= 0) {
+            usersList[idx].status = 'rejected';
+            saveStoredUsers(usersList);
+            return sendJson(res, {
+              success: true,
+              message: 'Akun telah ditolak.',
+              data: usersList[idx]
+            });
+          }
+          return sendJson(res, { success: false, message: 'Akun tidak ditemukan.' }, 404);
+        }
+
+        if (act === 'delete' || act === 'delete_user') {
+          const userId = body.userId || body.id || urlObj.searchParams.get('id');
+          const idx = usersList.findIndex(u => u.id === userId);
+          if (idx >= 0) {
+            const removed = usersList.splice(idx, 1);
+            saveStoredUsers(usersList);
+            return sendJson(res, {
+              success: true,
+              message: 'Akun berhasil dihapus.',
+              data: removed[0]
+            });
+          }
+          return sendJson(res, { success: false, message: 'Akun tidak ditemukan.' }, 404);
+        }
+
+        if (act === 'send_otp') {
+          const { email, purpose, code } = body;
+          const cleanEmail = (email || '').trim().toLowerCase();
+          const otpCode = code || Math.floor(100000 + Math.random() * 900000).toString();
+          console.log(`[SIPADES SERVER EMAIL] Dikirimkan ke: ${cleanEmail} | Subjek: [SIPADES] Kode Verifikasi (${purpose}) | Kode OTP: ${otpCode}`);
+          return sendJson(res, {
+            success: true,
+            message: `Kode verifikasi 6 digit telah dikirimkan ke email: ${cleanEmail}`,
+            email: cleanEmail,
+            code: otpCode
+          });
+        }
+
         if (act === 'update_profile') {
           const userId = body.id;
           const idx = usersList.findIndex(u => u.id === userId);

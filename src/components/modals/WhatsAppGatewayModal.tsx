@@ -200,8 +200,8 @@ export const WhatsAppGatewayModal: React.FC = () => {
                 <div className="grid grid-cols-2 gap-3">
                   {(
                     [
-                      'Simulasi Terpadu',
                       'Fonnte WA Gateway',
+                      'Direct WA Gateway',
                       'Wablas API',
                       'Twilio API'
                     ] as const
@@ -218,8 +218,8 @@ export const WhatsAppGatewayModal: React.FC = () => {
                     >
                       {prov}
                       <span className="block text-[10px] font-normal text-slate-500 mt-0.5">
-                        {prov === 'Simulasi Terpadu'
-                          ? 'Simulator outbox real-time bawaan sistem'
+                        {prov === 'Direct WA Gateway'
+                          ? 'Kirim langsung via protokol Web WA server desa'
                           : 'Koneksi REST API resmi dengan API Token'}
                       </span>
                     </button>

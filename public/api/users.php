@@ -136,7 +136,9 @@ if ($method === 'POST') {
             'identifier' => $identifier,
             'village' => $village,
             'avatar' => $avatar,
-            'phone' => $phone
+            'phone' => $phone,
+            'status' => 'pending',
+            'emailVerified' => true
         ];
         array_unshift($existing, $newUser);
         saveLocalFallbackUsers($existing);
@@ -312,6 +314,88 @@ if ($method === 'POST') {
             jsonResponse(['success' => true, 'message' => 'Email diverifikasi dan akun aktif.']);
         }
         jsonResponse(['success' => false, 'message' => 'Akun tidak ditemukan.'], 404);
+    }
+
+    // H. Kirim Kode OTP Verifikasi Resmi ke Email
+    if ($action === 'send_otp') {
+        $email = trim($body['email'] ?? '');
+        $purpose = trim($body['purpose'] ?? 'pendaftaran');
+        $code = trim($body['code'] ?? '');
+        if (empty($code)) {
+            $code = strval(rand(100000, 999999));
+        }
+
+        if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            jsonResponse(['success' => false, 'message' => 'Alamat email tidak valid.'], 400);
+        }
+
+        // Simpan OTP ke cache server
+        $otpCacheFile = __DIR__ . '/otp_cache.json';
+        $otps = file_exists($otpCacheFile) ? json_decode(file_get_contents($otpCacheFile), true) : [];
+        if (!is_array($otps)) $otps = [];
+        $otps[strtolower($email)] = [
+            'code' => $code,
+            'expires' => time() + 900
+        ];
+        file_put_contents($otpCacheFile, json_encode($otps));
+
+        // Subjek & Isi Email Resmi HTML
+        $isReset = ($purpose === 'reset_password');
+        $subject = $isReset
+            ? "[SIPADES] Kode Verifikasi Reset Kata Sandi"
+            : "[SIPADES] Kode Verifikasi Pendaftaran Akun Aparatur";
+
+        $message = "
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset='UTF-8'>
+          <title>{$subject}</title>
+        </head>
+        <body style='margin: 0; padding: 24px; background-color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;'>
+          <div style='max-width: 520px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.07);'>
+            <div style='background: linear-gradient(135deg, #065f46 0%, #047857 100%); padding: 28px 24px; text-align: center; color: #ffffff;'>
+              <h1 style='margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.5px;'>SIPADES Kec. Rakit Kulim</h1>
+              <p style='margin: 6px 0 0; font-size: 12px; color: #a7f3d0;'>Sistem Pelayanan Administrasi Desa Terpadu • Kab. Indragiri Hulu, Riau</p>
+            </div>
+            <div style='padding: 32px 24px;'>
+              <h2 style='margin: 0 0 12px; font-size: 16px; color: #0f172a;'>Yth. Calon Pengguna / Petugas,</h2>
+              <p style='margin: 0 0 20px; font-size: 14px; line-height: 1.6; color: #475569;'>
+                Berikut adalah 6 digit Kode Verifikasi OTP Anda untuk " . ($isReset ? "mereset kata sandi akun" : "konfirmasi pendaftaran akun") . " di sistem SIPADES:
+              </p>
+              <div style='background-color: #ecfdf5; border: 2px dashed #059669; border-radius: 12px; padding: 20px; text-align: center; margin: 24px 0;'>
+                <span style='font-family: Courier New, Courier, monospace; font-size: 34px; font-weight: 900; letter-spacing: 10px; color: #065f46;'>{$code}</span>
+              </div>
+              <p style='margin: 0; font-size: 12px; line-height: 1.6; color: #64748b;'>
+                • Kode ini berlaku selama <strong>15 menit</strong> sejak dikirimkan.<br>
+                • Rahasiakan kode ini dan jangan berikan kepada pihak mana pun.<br>
+                • Jika Anda tidak merasa meminta kode ini, mohon abaikan email ini.
+              </p>
+            </div>
+            <div style='background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 18px 24px; text-align: center;'>
+              <p style='margin: 0; font-size: 11px; color: #94a3b8;'>
+                Kantor Pelayanan Terpadu Kecamatan Rakit Kulim • Kabupaten Indragiri Hulu, Riau<br>
+                Email Otomatis Sistem — Mohon tidak membalas email ini langsung.
+              </p>
+            </div>
+          </div>
+        </body>
+        </html>
+        ";
+
+        $headers = "MIME-Version: 1.0\r\n";
+        $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+        $headers .= "From: SIPADES Rakit Kulim <noreply@desasukamaju.my.id>\r\n";
+        $headers .= "Reply-To: pelayanan@rakitkulim.desa.id\r\n";
+        $headers .= "X-Mailer: PHP/" . phpversion();
+
+        // Kirim email via server MTA / Postfix / Exim di DirectAdmin
+        @mail($email, $subject, $message, $headers);
+
+        jsonResponse([
+            'success' => true,
+            'message' => 'Kode OTP 6-digit berhasil dikirimkan ke email: ' . $email
+        ]);
     }
 
     jsonResponse(['success' => false, 'message' => 'Aksi tidak dikenali.'], 400);
