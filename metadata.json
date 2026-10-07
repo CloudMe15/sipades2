@@ -1,0 +1,6 @@
+{
+  "name": "SIPADES - Sistem Pelayanan Administrasi Desa",
+  "description": "Sistem Informasi & Pelayanan Administrasi Desa Terpadu Berbasis RBAC (Role RT, Operator Desa, dan Kecamatan) dengan Pelacakan Real-time & Notifikasi WhatsApp Gateway.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
