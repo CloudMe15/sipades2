@@ -222,18 +222,18 @@ export function handleApiRequest(
         }
 
         if (act === 'delete' || act === 'delete_user') {
-          const userId = body.userId || body.id || urlObj.searchParams.get('id');
-          const idx = usersList.findIndex(u => u.id === userId);
+          const userId = body?.userId || body?.id || urlObj.searchParams.get('id');
+          const idx = usersList.findIndex(u => u.id === userId || u.username === userId);
           if (idx >= 0) {
             const removed = usersList.splice(idx, 1);
             saveStoredUsers(usersList);
             return sendJson(res, {
               success: true,
-              message: 'Akun berhasil dihapus.',
+              message: 'Akun berhasil dihapus dari database & server.',
               data: removed[0]
             });
           }
-          return sendJson(res, { success: false, message: 'Akun tidak ditemukan.' }, 404);
+          return sendJson(res, { success: false, message: 'Akun tidak ditemukan di database.' }, 404);
         }
 
         if (act === 'send_otp') {
@@ -370,6 +370,14 @@ export function handleApiRequest(
           return sendJson(res, {
             success: true,
             message: 'Permohonan berhasil dihapus dari database.'
+          });
+        }
+
+        if (act === 'clear_all' || act === 'reset_all') {
+          saveStoredRequests([]);
+          return sendJson(res, {
+            success: true,
+            message: 'Seluruh permohonan berhasil dikosongkan untuk pengujian baru.'
           });
         }
 

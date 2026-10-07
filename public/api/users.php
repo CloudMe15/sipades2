@@ -57,16 +57,19 @@ if ($method === 'GET') {
 // ----------------------------------------------------
 // POST: Register Akun Mandiri atau Edit Profil
 // ----------------------------------------------------
-if ($method === 'POST') {
+if ($method === 'POST' || $method === 'DELETE') {
     $rawInput = file_get_contents('php://input');
     $body = json_decode($rawInput, true);
-
-    if (!$body) {
-        jsonResponse(['success' => false, 'message' => 'Format payload JSON tidak valid.'], 400);
+    if (!is_array($body)) {
+        $body = [];
     }
 
-    if (empty($action) && isset($body['action'])) {
-        $action = $body['action'];
+    if (empty($action)) {
+        if ($method === 'DELETE') {
+            $action = 'delete';
+        } elseif (isset($body['action'])) {
+            $action = $body['action'];
+        }
     }
 
     // A. Registrasi Mandiri Akun Baru
@@ -246,21 +249,38 @@ if ($method === 'POST') {
         jsonResponse(['success' => true, 'message' => 'Akun berhasil ditolak.']);
     }
 
-    // E. Hapus Akun
-    if ($action === 'delete') {
+    // E. Hapus Akun Permanen (Database MySQL & Backup Storage)
+    if ($action === 'delete' || $action === 'delete_user') {
         $id = $_GET['id'] ?? $body['userId'] ?? $body['id'] ?? '';
-        if ($dbConnected && $pdo && $id) {
-            try {
-                $stmt = $pdo->prepare("DELETE FROM users WHERE id=?");
-                $stmt->execute([$id]);
-            } catch (Exception $e) {}
+        if (empty($id)) {
+            jsonResponse(['success' => false, 'message' => 'ID akun pengguna tidak ditentukan.'], 400);
         }
+
+        $deletedFromDb = false;
+        if ($dbConnected && $pdo) {
+            try {
+                $stmt = $pdo->prepare("DELETE FROM users WHERE id = ? OR username = ?");
+                $stmt->execute([$id, $id]);
+                if ($stmt->rowCount() > 0) {
+                    $deletedFromDb = true;
+                }
+            } catch (Exception $e) {
+                error_log("Gagal menghapus user dari MySQL: " . $e->getMessage());
+            }
+        }
+
         $existing = getLocalFallbackUsers();
         $existing = array_values(array_filter($existing, function($u) use ($id) {
-            return $u['id'] !== $id;
+            return ($u['id'] ?? '') !== $id && ($u['username'] ?? '') !== $id;
         }));
         saveLocalFallbackUsers($existing);
-        jsonResponse(['success' => true, 'message' => 'Akun berhasil dihapus.']);
+
+        jsonResponse([
+            'success' => true,
+            'message' => 'Akun berhasil dihapus secara permanen dari database.',
+            'deletedFromDb' => $deletedFromDb,
+            'id' => $id
+        ]);
     }
 
     // F. Reset Password via Email

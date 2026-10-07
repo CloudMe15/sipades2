@@ -16,15 +16,17 @@ import {
   PieChart,
   ArrowUpRight,
   ShieldCheck,
-  UserCheck
+  UserCheck,
+  RotateCcw
 } from 'lucide-react';
 
 export const KecamatanDashboard: React.FC = () => {
-  const { villageStats, requests, currentUser, users, setAdminApprovalModalOpen } = useApp();
+  const { villageStats, requests, currentUser, users, setAdminApprovalModalOpen, clearComparisonData } = useApp();
 
   const [selectedVillage, setSelectedVillage] = useState<string>('all');
   const [selectedMonth, setSelectedMonth] = useState('Oktober 2026');
   const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
 
   const pendingUsers = users.filter(u => u.status === 'pending');
 
@@ -32,20 +34,46 @@ export const KecamatanDashboard: React.FC = () => {
   const totalSubmissions = villageStats.reduce((sum, v) => sum + v.totalRequests, 0);
   const totalCompleted = villageStats.reduce((sum, v) => sum + v.completed, 0);
   const averageSlaDistrict = (
-    villageStats.reduce((sum, v) => sum + v.averageSlaHours, 0) / villageStats.length
+    villageStats.filter(v => v.averageSlaHours > 0).length > 0
+      ? villageStats.filter(v => v.averageSlaHours > 0).reduce((sum, v) => sum + v.averageSlaHours, 0) / villageStats.filter(v => v.averageSlaHours > 0).length
+      : 0
   ).toFixed(1);
 
-  // Service distribution breakdown data
-  const serviceDistribution = [
-    { type: 'Surat Keterangan Usaha (SKU)', count: 162, percent: 34, color: 'bg-blue-500' },
-    { type: 'Surat Keterangan Tidak Mampu (SKTM)', count: 124, percent: 26, color: 'bg-emerald-500' },
-    { type: 'Surat Pengantar SKCK', count: 96, percent: 20, color: 'bg-amber-500' },
-    { type: 'Surat Keterangan Domisili (SKD)', count: 58, percent: 12, color: 'bg-purple-500' },
-    { type: 'Surat Pengantar Nikah (SPN)', count: 42, percent: 8, color: 'bg-rose-500' }
-  ];
+  const avgCompliance = totalSubmissions > 0
+    ? Math.round((totalCompleted / totalSubmissions) * 100)
+    : 0;
+
+  const topResponsiveVillage = [...villageStats]
+    .filter(v => v.totalRequests > 0)
+    .sort((a, b) => b.slaPerformancePercent - a.slaPerformancePercent || b.totalRequests - a.totalRequests)[0];
+
+  // Dynamic service distribution breakdown data based on live requests
+  const serviceDistribution = React.useMemo(() => {
+    const total = requests.length;
+    const types = [
+      { code: 'SKU', type: 'Surat Keterangan Usaha (SKU)', color: 'bg-blue-500' },
+      { code: 'SKTM', type: 'Surat Keterangan Tidak Mampu (SKTM)', color: 'bg-emerald-500' },
+      { code: 'SKCK', type: 'Surat Pengantar SKCK', color: 'bg-amber-500' },
+      { code: 'SKD', type: 'Surat Keterangan Domisili (SKD)', color: 'bg-purple-500' },
+      { code: 'SPN', type: 'Surat Pengantar Nikah (SPN)', color: 'bg-rose-500' }
+    ];
+    return types.map(t => {
+      const count = requests.filter(r => r.serviceType === t.code).length;
+      const percent = total > 0 ? Math.round((count / total) * 100) : 0;
+      return { type: t.type, count, percent, color: t.color };
+    });
+  }, [requests]);
 
   const handleExportReport = () => {
     setReportModalOpen(true);
+  };
+
+  const handleResetForTesting = async () => {
+    if (window.confirm('Kosongkan semua data permohonan dan komparasi pelayanan untuk memulai pengujian dari 0?')) {
+      setIsResetting(true);
+      await clearComparisonData();
+      setIsResetting(false);
+    }
   };
 
   return (
@@ -66,7 +94,16 @@ export const KecamatanDashboard: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <button
+              onClick={handleResetForTesting}
+              disabled={isResetting}
+              className="px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs flex items-center gap-2 border border-white/20 transition cursor-pointer"
+              title="Kosongkan seluruh data untuk uji coba dari 0"
+            >
+              <RotateCcw className={`w-3.5 h-3.5 ${isResetting ? 'animate-spin' : ''}`} />
+              <span>Reset Data Pengujian</span>
+            </button>
             <button
               onClick={handleExportReport}
               className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg transition cursor-pointer"
@@ -172,11 +209,11 @@ export const KecamatanDashboard: React.FC = () => {
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-black text-blue-600">92.4%</span>
+            <span className="text-3xl font-black text-blue-600">{avgCompliance}%</span>
             <span className="text-xs text-slate-400">Tepat Waktu</span>
           </div>
           <p className="text-[11px] text-slate-400 mt-1">
-            Target kinerja pelayanan publik tercapai
+            {totalSubmissions > 0 ? 'Target kinerja pelayanan publik dihitung dinamis' : 'Menunggu data pengujian permohonan'}
           </p>
         </div>
 
@@ -192,14 +229,18 @@ export const KecamatanDashboard: React.FC = () => {
           </div>
           <div className="mt-3">
             <span className="text-xl font-black text-slate-900 block truncate">
-              Desa Kelayang (Ibukota Kec)
+              {topResponsiveVillage ? topResponsiveVillage.villageName : 'Belum Ada Data Pengujian'}
             </span>
             <span className="text-xs text-emerald-700 font-bold">
-              SLA: 4.2 Jam • Skor 96.5%
+              {topResponsiveVillage
+                ? `SLA: ${topResponsiveVillage.averageSlaHours} Jam • Skor ${topResponsiveVillage.slaPerformancePercent}%`
+                : 'SLA: 0 Jam • Siap diuji coba'}
             </span>
           </div>
           <p className="text-[11px] text-slate-400 mt-1">
-            Peringkat 1 dari 19 Desa di Kecamatan Rakit Kulim
+            {topResponsiveVillage
+              ? 'Peringkat responsif teratas di Kecamatan Rakit Kulim'
+              : 'Otomatis dihitung saat permohonan surat dibuat'}
           </p>
         </div>
       </div>
@@ -229,53 +270,67 @@ export const KecamatanDashboard: React.FC = () => {
 
           {/* Comparative Bars Visualizer */}
           <div className="space-y-4 pt-2">
-            {villageStats.map((v, i) => {
-              const maxVal = Math.max(...villageStats.map(x => x.totalRequests));
-              const widthPct = Math.round((v.totalRequests / maxVal) * 100);
-
-              return (
-                <div key={v.villageId} className="space-y-1.5">
-                  <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-2">
-                      <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold flex items-center justify-center">
-                        #{i + 1}
-                      </span>
-                      <strong className="text-slate-900">{v.villageName}</strong>
-                      <span className="text-slate-400 text-[11px]">
-                        (Layanan Terbanyak: {v.topService})
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <span className="text-slate-600">
-                        <strong className="text-slate-900">{v.completed}</strong> / {v.totalRequests} surat
-                      </span>
-                      <span
-                        className={`text-[11px] font-bold px-2 py-0.5 rounded ${
-                          v.averageSlaHours <= 6
-                            ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                            : 'bg-amber-50 text-amber-800 border border-amber-200'
-                        }`}
-                      >
-                        SLA: {v.averageSlaHours} Jam
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Progress Bar */}
-                  <div className="w-full h-3 rounded-full bg-slate-100 overflow-hidden flex">
-                    <div
-                      className={`h-full rounded-full transition-all duration-500 ${
-                        i === 0
-                          ? 'bg-gradient-to-r from-emerald-500 to-teal-500'
-                          : 'bg-gradient-to-r from-purple-500 to-indigo-500'
-                      }`}
-                      style={{ width: `${widthPct}%` }}
-                    />
-                  </div>
+            {totalSubmissions === 0 ? (
+              <div className="py-8 px-4 text-center bg-slate-50/80 rounded-2xl border border-dashed border-slate-200 space-y-2.5">
+                <div className="w-10 h-10 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center mx-auto">
+                  <BarChart3 className="w-5 h-5" />
                 </div>
-              );
-            })}
+                <h4 className="text-xs sm:text-sm font-bold text-slate-800">
+                  Data Komparasi Pelayanan Antar-Desa Siap untuk Pengujian
+                </h4>
+                <p className="text-[11px] text-slate-500 max-w-lg mx-auto leading-relaxed">
+                  Semua data komparasi antar-desa telah dikosongkan (0 permohonan). Saat Anda melakukan uji coba pengajuan surat dari petugas RT atau Operator Desa, grafik komparasi volume, SLA, dan kepatuhan 19 desa akan langsung terakumulasi otomatis secara real-time.
+                </p>
+              </div>
+            ) : (
+              villageStats.map((v, i) => {
+                const maxVal = Math.max(...villageStats.map(x => x.totalRequests), 1);
+                const widthPct = Math.round((v.totalRequests / maxVal) * 100);
+
+                return (
+                  <div key={v.villageId} className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-2">
+                        <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold flex items-center justify-center">
+                          #{i + 1}
+                        </span>
+                        <strong className="text-slate-900">{v.villageName}</strong>
+                        <span className="text-slate-400 text-[11px]">
+                          (Layanan Terbanyak: {v.topService})
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <span className="text-slate-600">
+                          <strong className="text-slate-900">{v.completed}</strong> / {v.totalRequests} surat
+                        </span>
+                        <span
+                          className={`text-[11px] font-bold px-2 py-0.5 rounded ${
+                            v.averageSlaHours <= 6
+                              ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                              : 'bg-amber-50 text-amber-800 border border-amber-200'
+                          }`}
+                        >
+                          SLA: {v.averageSlaHours} Jam
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Progress Bar */}
+                    <div className="w-full h-3 rounded-full bg-slate-100 overflow-hidden flex">
+                      <div
+                        className={`h-full rounded-full transition-all duration-500 ${
+                          i === 0
+                            ? 'bg-gradient-to-r from-emerald-500 to-teal-500'
+                            : 'bg-gradient-to-r from-purple-500 to-indigo-500'
+                        }`}
+                        style={{ width: `${widthPct}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
 
           {/* SLA Evaluation Table */}
@@ -362,10 +417,12 @@ export const KecamatanDashboard: React.FC = () => {
             {/* Strategic Insight Box for Sub-District */}
             <div className="p-3.5 rounded-xl bg-purple-50/70 border border-purple-200 text-xs text-purple-900 space-y-1 mt-4">
               <span className="font-bold text-[11px] uppercase tracking-wider block text-purple-950">
-                💡 Insight Strategis Kecamatan:
+                💡 Status Pengujian Terpadu PATEN:
               </span>
               <p className="leading-relaxed">
-                "Bulan ini terjadi lonjakan permohonan <strong>Surat Keterangan Usaha (SKU)</strong> sebesar 34% di Desa Kelayang dan Kota Baru seiring pembukaan kuota Kredit Usaha Rakyat (KUR) BRI, serta lonjakan <strong>SKTM</strong> di Desa Bukit Indah dan Kuantan Tenang untuk pendaftaran beasiswa KIP Kuliah."
+                {totalSubmissions > 0
+                  ? `Saat ini tercatat ${totalSubmissions} berkas permohonan aktif pada pengujian. Sistem secara langsung menghitung kecepatan SLA dan akurasi pelayanan antar-desa.`
+                  : 'Seluruh data komparasi telah dikosongkan (0 permohonan). Silakan lakukan pengujian pengajuan surat melalui akun RT atau Operator Desa, dan periksa pembaruan otomatisnya pada panel ini.'}
               </p>
             </div>
           </div>

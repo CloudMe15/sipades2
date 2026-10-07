@@ -15,7 +15,8 @@ export const LetterPreviewModal: React.FC = () => {
     letterModalRequest,
     setLetterModalRequest,
     setVerificationModalRequest,
-    sendManualWhatsApp
+    sendManualWhatsApp,
+    villages
   } = useApp();
 
   const printAreaRef = useRef<HTMLDivElement>(null);
@@ -25,9 +26,10 @@ export const LetterPreviewModal: React.FC = () => {
   const req = letterModalRequest;
   const meta = SERVICE_METAS[req.serviceType];
   const desaName = req.desa || 'Desa Kelayang';
-  const villageInfo = RAKIT_KULIM_VILLAGES.find(
+  const villageList = villages && villages.length > 0 ? villages : RAKIT_KULIM_VILLAGES;
+  const villageInfo = villageList.find(
     v => v.name.toLowerCase() === desaName.toLowerCase()
-  ) || RAKIT_KULIM_VILLAGES[0];
+  ) || villageList[0];
   const kadesName = villageInfo?.kades || 'Kepala Desa';
   const desaCode = desaName.replace('Desa ', '').toUpperCase().slice(0, 3);
   const nomorSurat = req.nomorSuratDesa || `470/120/DS-${desaCode}/X/2026`;
@@ -307,9 +309,9 @@ export const LetterPreviewModal: React.FC = () => {
                 </p>
               </div>
 
-              {/* Right Side: Village Head Signature & Wet Seal */}
-              <div className="w-72 text-center font-sans text-xs relative">
-                <p className="text-[11px] text-slate-700">
+              {/* Right Side: Village Head Signature Area (Dikosongkan untuk TTD Manual & Stempel Basah) */}
+              <div className="w-72 text-center font-sans text-xs">
+                <p className="text-[11px] text-slate-700 leading-snug">
                   Ditetapkan di: {desaName.replace('Desa ', '')}<br />
                   Pada tanggal: {req.createdAt.split(',')[0] || '06 Oktober 2026'}
                 </p>
@@ -317,51 +319,28 @@ export const LetterPreviewModal: React.FC = () => {
                   KEPALA {desaName.toUpperCase()}
                 </p>
 
-                {/* Wet Stamp & Signature Representation */}
-                <div className="relative h-24 flex items-center justify-center my-1">
-                  {/* Violet Official Village Stamp */}
-                  <div
-                    className="absolute -left-2 top-0 w-24 h-24 rounded-full border-2 border-violet-700/80 text-violet-700 flex flex-col items-center justify-center p-1 text-[8px] font-bold uppercase rotate-[-8deg] pointer-events-none opacity-90 shadow-2xs"
-                    style={{
-                      backgroundImage: 'radial-gradient(circle, transparent 60%, rgba(109,40,217,0.1) 62%)'
-                    }}
-                  >
-                    <div className="w-20 h-20 rounded-full border border-dashed border-violet-700 flex flex-col items-center justify-center text-center p-0.5 leading-tight">
-                      <span className="text-[6px]">KAB. INDRAGIRI HULU</span>
-                      <span className="text-[7px] font-black">★ {desaName.toUpperCase()} ★</span>
-                      <span className="text-[6px] text-violet-600">KEC. RAKIT KULIM</span>
-                    </div>
-                  </div>
-
-                  {/* Calligraphic Signature Simulation */}
-                  <div className="relative z-10 text-blue-900 font-serif italic text-2xl font-bold tracking-widest rotate-[-4deg] select-none">
-                    {kadesName.split(',')[0].replace('H. ', '').replace('Hj. ', '')}
-                  </div>
+                {/* Ruang Kosong untuk Tanda Tangan Basah Manual & Stempel Fisik */}
+                <div className="h-24 w-full flex items-center justify-center" aria-label="Ruang tanda tangan manual">
+                  {/* Dikosongkan untuk tanda tangan basah dan cap stempel manual */}
                 </div>
 
                 <div className="text-slate-900 font-sans">
                   <p className="font-bold uppercase underline underline-offset-2">
                     {kadesName}
                   </p>
-                  <p className="text-[10px] text-slate-600 mt-0.5">
-                    Kepala {desaName}
-                  </p>
                 </div>
               </div>
             </div>
 
-            {/* Official Footer Security Note */}
+            {/* Official Footer Note */}
             <div className="mt-12 pt-3 border-t border-slate-200 flex items-center justify-between font-sans text-[9px] text-slate-500">
               <div className="flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                <Building className="w-3.5 h-3.5 text-slate-500" />
                 <span>
-                  Dokumen Elektronik Sah SIPADES • Kode Hash:{' '}
-                  <span className="font-mono font-bold text-slate-700">
-                    RK-{desaCode}-{req.id.toUpperCase()}
-                  </span>
+                  Pemerintah {desaName} • Kecamatan Rakit Kulim, Kabupaten Indragiri Hulu, Riau
                 </span>
               </div>
-              <span>Dicetak melalui Sistem Pelayanan Administrasi Desa Terpadu Kec. Rakit Kulim</span>
+              <span>Format Cetak Draf Resmi Pelayanan Administrasi Desa Terpadu (SIPADES)</span>
             </div>
           </div>
         </div>

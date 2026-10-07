@@ -12,16 +12,17 @@ import {
 } from 'lucide-react';
 
 export const PublicVerificationModal: React.FC = () => {
-  const { verificationModalRequest, setVerificationModalRequest } = useApp();
+  const { verificationModalRequest, setVerificationModalRequest, villages } = useApp();
 
   if (!verificationModalRequest) return null;
 
   const req = verificationModalRequest;
   const meta = SERVICE_METAS[req.serviceType];
   const desaName = req.desa || 'Desa Kelayang';
-  const villageInfo = RAKIT_KULIM_VILLAGES.find(
+  const villageList = villages && villages.length > 0 ? villages : RAKIT_KULIM_VILLAGES;
+  const villageInfo = villageList.find(
     v => v.name.toLowerCase() === desaName.toLowerCase()
-  ) || RAKIT_KULIM_VILLAGES[0];
+  ) || villageList[0];
   const kadesName = villageInfo?.kades || 'Kepala Desa';
   const desaCode = desaName.replace('Desa ', '').toUpperCase().slice(0, 3);
   const nomorSurat = req.nomorSuratDesa || `470/120/DS-${desaCode}/X/2026`;

@@ -12,7 +12,10 @@ import {
   Download,
   Calendar,
   User,
-  ArrowUpDown
+  ArrowUpDown,
+  FileCheck2,
+  CheckCircle2,
+  Clock
 } from 'lucide-react';
 
 interface RequestTrackingTableProps {
@@ -29,7 +32,8 @@ export const RequestTrackingTable: React.FC<RequestTrackingTableProps> = ({
     setSelectedRequest,
     setLetterModalRequest,
     sendManualWhatsApp,
-    currentUser
+    currentUser,
+    setPreviewSignedDoc
   } = useApp();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -208,6 +212,10 @@ export const RequestTrackingTable: React.FC<RequestTrackingTableProps> = ({
                   const isRevision = req.status === 'butuh_perbaikan';
                   const isCompleted = req.status === 'selesai_siap_ambil';
                   const isHandedOver = req.status === 'sudah_diambil';
+                  const scanAttachment = req.attachments.find(a => a.type === 'surat_selesai_scan');
+                  const isSigned = !!req.isManuallySigned || !!scanAttachment || isCompleted || isHandedOver;
+                  const signedDocUrl = req.signedDocumentUrl || scanAttachment?.fileUrl;
+                  const signedDocName = req.signedDocumentName || scanAttachment?.name;
 
                   // Row background styling
                   let rowBg = 'hover:bg-slate-50/80';
@@ -261,9 +269,39 @@ export const RequestTrackingTable: React.FC<RequestTrackingTableProps> = ({
                         </p>
                       </td>
 
-                      {/* Status */}
+                      {/* Status & TTD Indikator */}
                       <td className="py-3.5 px-4">
                         <StatusBadge status={req.status} size="sm" />
+
+                        {/* Physical signature badge indicator */}
+                        {isSigned ? (
+                          <div className="mt-1">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setPreviewSignedDoc({
+                                  url: signedDocUrl || 'https://placehold.co/600x800/065f46/ffffff?text=SURAT+RESMI+TERTANDATANGANI+KADES+%2B+CAP+DESA',
+                                  name: signedDocName || `Scan_Surat_${req.serviceType}_Signed.pdf`,
+                                  request: req
+                                });
+                              }}
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200 transition cursor-pointer shadow-2xs"
+                              title="Dokumen telah ditandatangani manual oleh Kepala Desa. Klik untuk melihat berkas scan."
+                            >
+                              <CheckCircle2 className="w-3 h-3 text-emerald-600 shrink-0" />
+                              <span>✍️ Sudah TTD Manual</span>
+                            </button>
+                          </div>
+                        ) : req.status === 'menunggu_ttd_kades' ? (
+                          <div className="mt-1">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+                              <Clock className="w-3 h-3 text-purple-600 shrink-0" />
+                              <span>⏳ Di Meja Kades</span>
+                            </span>
+                          </div>
+                        ) : null}
+
                         {isRevision && req.rejectionReason && (
                           <div
                             className="mt-1 text-[10px] text-rose-700 font-medium truncate max-w-[200px]"
@@ -296,6 +334,23 @@ export const RequestTrackingTable: React.FC<RequestTrackingTableProps> = ({
                           >
                             <Eye className="w-3.5 h-3.5" />
                           </button>
+
+                          {/* View Signed Document Button if signed */}
+                          {isSigned && (
+                            <button
+                              onClick={() =>
+                                setPreviewSignedDoc({
+                                  url: signedDocUrl || 'https://placehold.co/600x800/065f46/ffffff?text=SURAT+RESMI+TERTANDATANGANI+KADES+%2B+CAP+DESA',
+                                  name: signedDocName || `Scan_Surat_${req.serviceType}_Signed.pdf`,
+                                  request: req
+                                })
+                              }
+                              className="p-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 transition cursor-pointer"
+                              title="Lihat Berkas Hasil Scan TTD Basah Kades"
+                            >
+                              <FileCheck2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
 
                           {/* Print/Preview Letter Button if ready or processed */}
                           <button

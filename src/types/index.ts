@@ -86,6 +86,13 @@ export interface CitizenRequest {
   // Tracking Log
   timeline: StatusTimelineEvent[];
 
+  // Manual Signature & Physical Verification Tracking
+  isManuallySigned?: boolean;
+  signedDocumentUrl?: string;
+  signedDocumentName?: string;
+  signedAt?: string;
+  signedByKadesName?: string;
+
   // Ekspedisi / Handover Data
   handover?: {
     pickedUpAt: string;
@@ -124,6 +131,18 @@ export interface WhatsAppMessageLog {
   timestamp: string;
   status: 'Terkirim' | 'Gagal' | 'Pending';
   directWaLink: string;
+}
+
+export interface RakitKulimVillage {
+  id: string;
+  name: string;
+  code: string;
+  dusunCount: number;
+  rtCount: number;
+  rwCount: number;
+  kades: string;
+  phone: string;
+  isCapital?: boolean;
 }
 
 export interface VillageStats {

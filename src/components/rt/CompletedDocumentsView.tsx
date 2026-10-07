@@ -19,7 +19,8 @@ export const CompletedDocumentsView: React.FC = () => {
     requests,
     setLetterModalRequest,
     setSelectedRequest,
-    sendManualWhatsApp
+    sendManualWhatsApp,
+    setPreviewSignedDoc
   } = useApp();
 
   const completedRequests = requests.filter(
@@ -130,22 +131,42 @@ export const CompletedDocumentsView: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                  <button
-                    onClick={() => setLetterModalRequest(req)}
-                    className="flex-1 py-2 px-3 bg-white border border-slate-300 hover:bg-slate-50 rounded-xl text-xs font-bold text-slate-800 flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
-                  >
-                    <Download className="w-3.5 h-3.5 text-emerald-700" />
-                    <span>Unduh Soft-copy</span>
-                  </button>
+                <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
+                  {(req.signedDocumentUrl || req.attachments.find(a => a.type === 'surat_selesai_scan')?.fileUrl) && (
+                    <button
+                      onClick={() => {
+                        const att = req.attachments.find(a => a.type === 'surat_selesai_scan');
+                        setPreviewSignedDoc({
+                          url: req.signedDocumentUrl || att?.fileUrl || '',
+                          name: req.signedDocumentName || att?.name || 'Scan_Surat_Resmi_Signed.pdf',
+                          request: req
+                        });
+                      }}
+                      className="w-full py-2 px-3 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-xl text-xs font-bold text-emerald-800 flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs transition"
+                      title="Lihat berkas fisik scan surat bertanda tangan basah Kades & cap stempel"
+                    >
+                      <Eye className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Lihat Berkas Hasil Scan TTD Manual Kades</span>
+                    </button>
+                  )}
 
-                  <button
-                    onClick={() => handleSendWaNotification(req)}
-                    className="flex-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-700 rounded-xl text-xs font-bold text-white flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
-                  >
-                    <Send className="w-3.5 h-3.5" />
-                    <span>Teruskan ke WA Warga</span>
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setLetterModalRequest(req)}
+                      className="flex-1 py-2 px-3 bg-white border border-slate-300 hover:bg-slate-50 rounded-xl text-xs font-bold text-slate-800 flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                    >
+                      <Download className="w-3.5 h-3.5 text-emerald-700" />
+                      <span>Format Draf</span>
+                    </button>
+
+                    <button
+                      onClick={() => handleSendWaNotification(req)}
+                      className="flex-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-700 rounded-xl text-xs font-bold text-white flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                    >
+                      <Send className="w-3.5 h-3.5" />
+                      <span>Teruskan WA</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             );

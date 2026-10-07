@@ -50,10 +50,10 @@ export const AdminApprovalModal: React.FC = () => {
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (window.confirm(`Hapus permanen akun ${name}?`)) {
+    if (window.confirm(`Hapus permanen akun "${name}" dari database sistem? Akun ini akan dihapus secara total dari database dan tidak dapat login lagi.`)) {
       await deleteUser(id);
-      setActionMessage({ text: `Akun ${name} telah dihapus permanen.`, type: 'success' });
-      setTimeout(() => setActionMessage(null), 3000);
+      setActionMessage({ text: `Akun "${name}" telah berhasil dihapus permanen dari database sistem & server.`, type: 'success' });
+      setTimeout(() => setActionMessage(null), 3500);
     }
   };
 
@@ -210,6 +210,13 @@ export const AdminApprovalModal: React.FC = () => {
                       </div>
 
                       <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                        <button
+                          onClick={() => handleDelete(u.id, u.name)}
+                          className="p-1.5 rounded-xl border border-slate-200 text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                          title="Hapus Permanen dari Database"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                         <button
                           onClick={() => handleReject(u.id, u.name)}
                           className="px-3 py-1.5 rounded-xl border border-rose-300 hover:bg-rose-50 text-rose-700 text-xs font-bold transition flex items-center gap-1 cursor-pointer"

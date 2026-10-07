@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { useApp } from '../../context/AppContext';
 import { StatusBadge } from '../common/StatusBadge';
-import { SERVICE_METAS } from '../../data/mockData';
+import { SERVICE_METAS, RAKIT_KULIM_VILLAGES } from '../../data/mockData';
 import {
   X,
   User,
@@ -16,7 +16,11 @@ import {
   Eye,
   AlertTriangle,
   CheckCircle2,
-  ExternalLink
+  ExternalLink,
+  Upload,
+  FileCheck2,
+  ShieldCheck,
+  Check
 } from 'lucide-react';
 
 export const RequestDetailModal: React.FC = () => {
@@ -27,12 +31,39 @@ export const RequestDetailModal: React.FC = () => {
     setLetterModalRequest,
     setVerificationModalRequest,
     sendManualWhatsApp,
-    downloadDocument
+    downloadDocument,
+    setPreviewSignedDoc,
+    uploadManualSignedFile,
+    villages
   } = useApp();
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!selectedRequest) return null;
 
   const serviceMeta = SERVICE_METAS[selectedRequest.serviceType];
+  const desaName = selectedRequest.desa || 'Desa Kelayang';
+  const villageList = villages && villages.length > 0 ? villages : RAKIT_KULIM_VILLAGES;
+  const villageInfo = villageList.find(v => v.name.toLowerCase() === desaName.toLowerCase()) || villageList[0];
+  const kadesName = selectedRequest.signedByKadesName || villageInfo?.kades || 'Kepala Desa';
+
+  const scanAttachment = selectedRequest.attachments.find(a => a.type === 'surat_selesai_scan');
+  const isSigned = !!selectedRequest.isManuallySigned || !!scanAttachment || selectedRequest.status === 'selesai_siap_ambil' || selectedRequest.status === 'sudah_diambil';
+  const signedDocUrl = selectedRequest.signedDocumentUrl || scanAttachment?.fileUrl;
+  const signedDocName = selectedRequest.signedDocumentName || scanAttachment?.name;
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files[0]) {
+      const file = files[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        const resultUrl = reader.result as string;
+        uploadManualSignedFile(selectedRequest.id, resultUrl, file.name);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSendWaReminder = () => {
     const desa = selectedRequest.desa || 'Desa Kelayang';
@@ -78,6 +109,99 @@ export const RequestDetailModal: React.FC = () => {
 
         {/* Content Body */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {/* Hidden File Input for Direct Upload */}
+          <input
+            type="file"
+            accept="image/*,application/pdf"
+            ref={fileInputRef}
+            onChange={handleFileUpload}
+            className="hidden"
+          />
+
+          {/* Status Tanda Tangan Fisik (Manual) & Cap Desa */}
+          <div className={`p-4 sm:p-5 rounded-2xl border transition-all ${
+            isSigned
+              ? 'bg-emerald-50/70 border-emerald-300 ring-2 ring-emerald-500/10'
+              : 'bg-purple-50/60 border-purple-200'
+          }`}>
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                  isSigned ? 'bg-emerald-700 text-white' : 'bg-purple-700 text-white'
+                }`}>
+                  {isSigned ? <FileCheck2 className="w-5 h-5" /> : <Clock className="w-5 h-5" />}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded-md ${
+                      isSigned ? 'bg-emerald-200/80 text-emerald-950' : 'bg-purple-200/80 text-purple-950'
+                    }`}>
+                      {isSigned ? '✓ Sudah Ditandatangani Manual' : '⏳ Menunggu Tanda Tangan Fisik'}
+                    </span>
+                    {isSigned && (
+                      <span className="text-[10px] text-emerald-700 font-bold bg-white px-2 py-0.5 rounded border border-emerald-300">
+                        Cap & Stempel Basah Sah
+                      </span>
+                    )}
+                  </div>
+
+                  <h4 className="font-bold text-sm text-slate-900 mt-1">
+                    {isSigned
+                      ? `Surat Telah Ditandatangani Basah oleh Kepala ${desaName}`
+                      : `Surat Fisik Sedang Berada di Meja Kepala ${desaName}`}
+                  </h4>
+
+                  <div className="text-xs text-slate-600 mt-1 space-y-0.5">
+                    <p>
+                      Pejabat Penandatangan:{' '}
+                      <strong className="text-slate-900">{kadesName}</strong> (Kepala {desaName})
+                    </p>
+                    {isSigned && (
+                      <p className="text-emerald-800 font-mono text-[11px]">
+                        Berkas Terlampir: <strong>{signedDocName || 'Scan_Surat_Resmi_Signed.pdf'}</strong>
+                        {selectedRequest.signedAt && ` • Diunggah: ${selectedRequest.signedAt}`}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex flex-wrap items-center gap-2">
+                {isSigned && signedDocUrl && (
+                  <button
+                    onClick={() =>
+                      setPreviewSignedDoc({
+                        url: signedDocUrl,
+                        name: signedDocName || 'Scan_Surat_Resmi_Signed.pdf',
+                        request: selectedRequest
+                      })
+                    }
+                    className="px-3.5 py-2 text-xs font-bold text-emerald-800 bg-white hover:bg-emerald-100 border border-emerald-300 rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                  >
+                    <Eye className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Lihat Berkas TTD</span>
+                  </button>
+                )}
+
+                {(currentUser?.role === 'operator' || currentUser?.role === 'admin') && (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`px-3.5 py-2 text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-2xs ${
+                      isSigned
+                        ? 'bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300'
+                        : 'bg-purple-700 hover:bg-purple-800 text-white shadow-purple-700/20'
+                    }`}
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>{isSigned ? 'Ganti File Scan' : '+ Unggah File Scan TTD Manual'}</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
           {/* Rejection Alert if Butuh Perbaikan */}
           {selectedRequest.status === 'butuh_perbaikan' && selectedRequest.rejectionReason && (
             <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 flex items-start gap-3">
@@ -253,14 +377,30 @@ export const RequestDetailModal: React.FC = () => {
                     </div>
 
                     <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
-                      <a
-                        href={att.fileUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
-                      >
-                        <Eye className="w-3.5 h-3.5" /> Preview
-                      </a>
+                      {isScanOfficial ? (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setPreviewSignedDoc({
+                              url: att.fileUrl,
+                              name: att.name,
+                              request: selectedRequest
+                            })
+                          }
+                          className="text-xs text-emerald-700 hover:text-emerald-900 font-bold flex items-center gap-1 cursor-pointer"
+                        >
+                          <Eye className="w-3.5 h-3.5" /> Pratinjau TTD
+                        </button>
+                      ) : (
+                        <a
+                          href={att.fileUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
+                        >
+                          <Eye className="w-3.5 h-3.5" /> Preview
+                        </a>
+                      )}
 
                       <button
                         type="button"

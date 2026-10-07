@@ -35,12 +35,12 @@ export const MonthlyReportModal: React.FC<MonthlyReportModalProps> = ({
   const totalPermohonan = villageStats.reduce((sum, v) => sum + v.totalRequests, 0);
   const totalSelesai = villageStats.reduce((sum, v) => sum + v.completed, 0);
   const totalRevisi = villageStats.reduce((sum, v) => sum + v.revision, 0);
-  const avgSla = (
-    villageStats.reduce((sum, v) => sum + v.averageSlaHours, 0) / villageStats.length
-  ).toFixed(1);
-  const avgKepatuhan = (
-    villageStats.reduce((sum, v) => sum + v.slaPerformancePercent, 0) / villageStats.length
-  ).toFixed(1);
+  const avgSla = villageStats.length > 0 && villageStats.some(v => v.averageSlaHours > 0)
+    ? (villageStats.filter(v => v.averageSlaHours > 0).reduce((sum, v) => sum + v.averageSlaHours, 0) / villageStats.filter(v => v.averageSlaHours > 0).length).toFixed(1)
+    : '0.0';
+  const avgKepatuhan = totalPermohonan > 0
+    ? (villageStats.reduce((sum, v) => sum + v.slaPerformancePercent, 0) / villageStats.length).toFixed(1)
+    : '0.0';
 
   const handleDownloadCsv = () => {
     const headers = [

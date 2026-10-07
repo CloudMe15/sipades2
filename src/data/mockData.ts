@@ -385,492 +385,218 @@ export const MOCK_USERS: CurrentUser[] = [
 ];
 
 // Data Permohonan Awal di Kecamatan Rakit Kulim
-export const INITIAL_REQUESTS: CitizenRequest[] = [
-  {
-    id: 'req-001',
-    ticketNumber: 'REQ-20261006-001',
-    nomorSuratDesa: '510/042/DS-KLY/X/2026',
-    nik: '1402091205930002',
-    namaLengkap: 'Budi Santoso',
-    nomorWhatsapp: '081287654321',
-    nomorKk: '1402092508110005',
-    tempatLahir: 'Kelayang',
-    tanggalLahir: '1993-05-12',
-    jenisKelamin: 'Laki-laki',
-    agama: 'Islam',
-    pekerjaan: 'Petani Kelapa Sawit / Wiraswasta',
-    alamat: 'Dusun Sukamulia, RT 01 / RW 01',
-    rt: '01',
-    rw: '01',
-    desa: 'Desa Kelayang',
-    serviceType: 'SKU',
-    keperluan: 'Syarat pengajuan modal perkebunan kelapa sawit Kredit Usaha Rakyat (KUR) di Bank BRI Unit Kelayang.',
-    rincianTambahan: {
-      'Nama Usaha': 'Usaha Perkebunan Kelapa Sawit & Saprodi Berkah',
-      'Bidang Usaha': 'Perkebunan Rakyat & Penjualan Pupuk',
-      'Tahun Berdiri': '2019',
-      'Lokasi Usaha': 'Jl. Poros Desa Kelayang, RT 01/RW 01'
-    },
-    attachments: [
-      {
-        id: 'att-001',
-        type: 'ktp',
-        name: 'KTP_Budi_Santoso_Kelayang.jpg',
-        fileUrl: 'https://placehold.co/600x400/1e293b/ffffff?text=FOTO+E-KTP+BUDI+SANTOSO',
-        uploadedAt: '06 Okt 2026, 08:30 WIB',
-        uploadedBy: 'Junaidi, S.Pd (RT 01 Desa Kelayang)',
-        status: 'valid'
-      },
-      {
-        id: 'att-002',
-        type: 'kk',
-        name: 'KK_Budi_Santoso.jpg',
-        fileUrl: 'https://placehold.co/600x400/334155/ffffff?text=KARTU+KELUARGA+BUDI+SANTOSO',
-        uploadedAt: '06 Okt 2026, 08:30 WIB',
-        uploadedBy: 'Junaidi, S.Pd (RT 01 Desa Kelayang)',
-        status: 'valid'
-      }
-    ],
-    status: 'menunggu_verifikasi',
-    createdAt: '06 Okt 2026, 08:30 WIB',
-    updatedAt: '06 Okt 2026, 08:30 WIB',
-    estimatedCompletion: 'Dalam 24 Jam Kerja',
-    timeline: [
-      {
-        id: 'tl-001',
-        status: 'menunggu_verifikasi',
-        timestamp: '06 Okt 2026, 08:30 WIB',
-        actor: 'Junaidi, S.Pd (Ketua RT 01)',
-        role: 'rt',
-        note: 'Permohonan Surat Keterangan Usaha (SKU) didaftarkan melalui loket online RT 01 Desa Kelayang.'
-      }
-    ]
-  },
-  {
-    id: 'req-002',
-    ticketNumber: 'REQ-20261006-002',
-    nomorSuratDesa: '331/018/DS-KTB/X/2026',
-    nik: '1402095508020003',
-    namaLengkap: 'Siti Rahmawati',
-    nomorWhatsapp: '085277889900',
-    nomorKk: '1402091402120008',
-    tempatLahir: 'Kota Baru',
-    tanggalLahir: '2002-08-15',
-    jenisKelamin: 'Perempuan',
-    agama: 'Islam',
-    pekerjaan: 'Pelajar / Mahasiswa',
-    alamat: 'Jl. Pemuda No. 12, RT 01 / RW 01',
-    rt: '01',
-    rw: '01',
-    desa: 'Desa Kota Baru',
-    serviceType: 'SKCK',
-    keperluan: 'Syarat pendaftaran seleksi Calon Pegawai Negeri Sipil (CPNS) di Pemerintah Kabupaten Indragiri Hulu.',
-    attachments: [
-      {
-        id: 'att-003',
-        type: 'ktp',
-        name: 'KTP_Siti_Rahmawati.jpg',
-        fileUrl: 'https://placehold.co/600x400/0f172a/ffffff?text=KTP+SITI+RAHMAWATI',
-        uploadedAt: '06 Okt 2026, 09:10 WIB',
-        uploadedBy: 'Hendra Wijaya (RT 01 Desa Kota Baru)',
-        status: 'valid'
-      },
-      {
-        id: 'att-004',
-        type: 'kk',
-        name: 'KK_Keluarga_Rahmawati.jpg',
-        fileUrl: 'https://placehold.co/600x400/1e1b4b/ffffff?text=KK+KELUARGA+SITI+RAHMAWATI',
-        uploadedAt: '06 Okt 2026, 09:10 WIB',
-        uploadedBy: 'Hendra Wijaya (RT 01 Desa Kota Baru)',
-        status: 'valid'
-      }
-    ],
-    status: 'diproses',
-    createdAt: '06 Okt 2026, 09:10 WIB',
-    updatedAt: '06 Okt 2026, 09:45 WIB',
-    estimatedCompletion: 'Dalam 4 Jam Kerja',
-    timeline: [
-      {
-        id: 'tl-002',
-        status: 'menunggu_verifikasi',
-        timestamp: '06 Okt 2026, 09:10 WIB',
-        actor: 'Hendra Wijaya (RT 01 Kota Baru)',
-        role: 'rt',
-        note: 'Pengajuan Pengantar SKCK berhasil diserahkan ke sistem desa.'
-      },
-      {
-        id: 'tl-003',
-        status: 'diproses',
-        timestamp: '06 Okt 2026, 09:45 WIB',
-        actor: 'Asep Ridwan, S.Kom (Operator)',
-        role: 'operator',
-        note: 'Berkas e-KTP dan KK diverifikasi lengkap. Draf surat fisik pengantar ke Polsek sedang dicetak.'
-      }
-    ]
-  },
-  {
-    id: 'req-003',
-    ticketNumber: 'REQ-20261005-015',
-    nomorSuratDesa: '470/115/DS-BKI/X/2026',
-    nik: '1402092107980004',
-    namaLengkap: 'Rian Hidayat',
-    nomorWhatsapp: '081399887766',
-    nomorKk: '1402091104100002',
-    tempatLahir: 'Bukit Indah',
-    tanggalLahir: '1998-07-21',
-    jenisKelamin: 'Laki-laki',
-    agama: 'Islam',
-    pekerjaan: 'Karyawan Swasta',
-    alamat: 'Dusun Jaya Makmur RT 01 / RW 01',
-    rt: '01',
-    rw: '01',
-    desa: 'Desa Bukit Indah',
-    serviceType: 'SKD',
-    keperluan: 'Persyaratan kelengkapan mutasi kerja di pabrik kelapa sawit PT. Inhu Palma Lestari.',
-    attachments: [
-      {
-        id: 'att-005',
-        type: 'ktp',
-        name: 'KTP_Rian_Hidayat.jpg',
-        fileUrl: 'https://placehold.co/600x400/064e3b/ffffff?text=KTP+RIAN+HIDAYAT',
-        uploadedAt: '05 Okt 2026, 14:00 WIB',
-        uploadedBy: 'Suparman (RT 01 Bukit Indah)',
-        status: 'valid'
-      },
-      {
-        id: 'att-006',
-        type: 'surat_selesai_scan',
-        name: 'Scan_Resmi_SKD_Rian_Hidayat_Signed.pdf',
-        fileUrl: 'https://placehold.co/600x800/065f46/ffffff?text=SURAT+RESMI+TERTANDATANGANI+KADES+BUKIT+INDAH',
-        uploadedAt: '05 Okt 2026, 16:30 WIB',
-        uploadedBy: 'Asep Ridwan (Operator)',
-        status: 'valid'
-      }
-    ],
-    status: 'selesai_siap_ambil',
-    createdAt: '05 Okt 2026, 14:00 WIB',
-    updatedAt: '05 Okt 2026, 16:30 WIB',
-    completedAt: '05 Okt 2026, 16:30 WIB',
-    slaActualHours: 2.5,
-    estimatedCompletion: 'Selesai',
-    timeline: [
-      {
-        id: 'tl-004',
-        status: 'menunggu_verifikasi',
-        timestamp: '05 Okt 2026, 14:00 WIB',
-        actor: 'Suparman (RT 01 Bukit Indah)',
-        role: 'rt',
-        note: 'Pengajuan surat domisili didaftarkan.'
-      },
-      {
-        id: 'tl-005',
-        status: 'diproses',
-        timestamp: '05 Okt 2026, 14:30 WIB',
-        actor: 'Operator Pelayanan',
-        role: 'operator',
-        note: 'Draf surat dicetak.'
-      },
-      {
-        id: 'tl-006',
-        status: 'menunggu_ttd_kades',
-        timestamp: '05 Okt 2026, 15:00 WIB',
-        actor: 'Operator Pelayanan',
-        role: 'operator',
-        note: 'Diserahkan ke Kepala Desa untuk tanda tangan basah & stempel dinas.'
-      },
-      {
-        id: 'tl-007',
-        status: 'selesai_siap_ambil',
-        timestamp: '05 Okt 2026, 16:30 WIB',
-        actor: 'Operator Pelayanan',
-        role: 'operator',
-        note: 'Surat resmi selesai ditandatangani Kades. Notifikasi WhatsApp terkirim ke warga.'
-      }
-    ]
-  },
-  {
-    id: 'req-004',
-    ticketNumber: 'REQ-20261005-008',
-    nomorSuratDesa: '474/011/DS-TSM/X/2026',
-    nik: '1402094803970001',
-    namaLengkap: 'Dewi Lestari',
-    nomorWhatsapp: '085366778899',
-    nomorKk: '1402092006150009',
-    tempatLahir: 'Talang Suka Maju',
-    tanggalLahir: '1997-03-08',
-    jenisKelamin: 'Perempuan',
-    agama: 'Islam',
-    pekerjaan: 'Wiraswasta',
-    alamat: 'Dusun Rimba Makmur RT 01 / RW 01',
-    rt: '01',
-    rw: '01',
-    desa: 'Desa Talang Suka Maju',
-    serviceType: 'SPN',
-    keperluan: 'Permohonan formulir pengantar pendaftaran akad nikah N1-N4 ke KUA Kecamatan Rakit Kulim.',
-    attachments: [
-      {
-        id: 'att-007',
-        type: 'ktp',
-        name: 'KTP_Dewi_Lestari.jpg',
-        fileUrl: 'https://placehold.co/600x400/4c1d95/ffffff?text=KTP+DEWI+LESTARI',
-        uploadedAt: '05 Okt 2026, 10:15 WIB',
-        uploadedBy: 'Darmawan (RT 01 Talang Suka Maju)',
-        status: 'valid'
-      }
-    ],
-    status: 'sudah_diambil',
-    createdAt: '05 Okt 2026, 10:15 WIB',
-    updatedAt: '05 Okt 2026, 17:00 WIB',
-    completedAt: '05 Okt 2026, 15:45 WIB',
-    slaActualHours: 5.5,
-    estimatedCompletion: 'Selesai',
-    handover: {
-      pickedUpAt: '05 Okt 2026, 17:00 WIB',
-      pickedUpBy: 'Dewi Lestari',
-      relationToCitizen: 'Pemohon Sendiri',
-      operatorName: 'Asep Ridwan, S.Kom',
-      notes: 'Surat formulir nikah N1-N4 asli diserahkan langsung kepada pemohon untuk dibawa ke KUA Rakit Kulim.',
-      idCardVerified: true
-    },
-    timeline: [
-      {
-        id: 'tl-008',
-        status: 'menunggu_verifikasi',
-        timestamp: '05 Okt 2026, 10:15 WIB',
-        actor: 'Darmawan (RT 01 Talang Suka Maju)',
-        role: 'rt',
-        note: 'Permohonan diajukan.'
-      },
-      {
-        id: 'tl-009',
-        status: 'selesai_siap_ambil',
-        timestamp: '05 Okt 2026, 15:45 WIB',
-        actor: 'Operator Pelayanan',
-        role: 'operator',
-        note: 'Surat selesai ditandatangani Kepala Desa.'
-      },
-      {
-        id: 'tl-010',
-        status: 'sudah_diambil',
-        timestamp: '05 Okt 2026, 17:00 WIB',
-        actor: 'Operator Pelayanan',
-        role: 'operator',
-        note: 'Fisik surat asli telah diserahkan di loket kantor desa kepada Dewi Lestari. KTP telah dicocokkan.'
-      }
-    ]
-  }
-];
+export const INITIAL_REQUESTS: CitizenRequest[] = [];
 
 // Statistik 19 Desa di Kecamatan Rakit Kulim untuk Dashboard Kecamatan
 export const MOCK_VILLAGE_STATS: VillageStats[] = [
   {
-    villageId: 'desa-kelayang',
-    villageName: 'Desa Kelayang (Ibukota Kec)',
-    totalRequests: 145,
-    completed: 132,
-    inProgress: 9,
-    revision: 4,
-    averageSlaHours: 4.2,
-    slaPerformancePercent: 96.5,
-    topService: 'Surat Keterangan Usaha (SKU)'
+    villageId: "desa-kelayang",
+    villageName: "Desa Kelayang (Ibukota Kec)",
+    totalRequests: 0,
+    completed: 0,
+    inProgress: 0,
+    revision: 0,
+    averageSlaHours: 0,
+    slaPerformancePercent: 0,
+    topService: "-"
   },
   {
-    villageId: 'desa-kotabaru',
-    villageName: 'Desa Kota Baru',
-    totalRequests: 118,
-    completed: 106,
-    inProgress: 8,
-    revision: 4,
-    averageSlaHours: 4.8,
-    slaPerformancePercent: 94.0,
-    topService: 'Surat Pengantar SKCK'
+    villageId: "desa-kotabaru",
+    villageName: "Desa Kota Baru",
+    totalRequests: 0,
+    completed: 0,
+    inProgress: 0,
+    revision: 0,
+    averageSlaHours: 0,
+    slaPerformancePercent: 0,
+    topService: "-"
   },
   {
-    villageId: 'desa-bukitindah',
-    villageName: 'Desa Bukit Indah',
-    totalRequests: 96,
-    completed: 88,
-    inProgress: 5,
-    revision: 3,
-    averageSlaHours: 5.1,
-    slaPerformancePercent: 92.5,
-    topService: 'Surat Keterangan Domisili (SKD)'
+    villageId: "desa-bukitindah",
+    villageName: "Desa Bukit Indah",
+    totalRequests: 0,
+    completed: 0,
+    inProgress: 0,
+    revision: 0,
+    averageSlaHours: 0,
+    slaPerformancePercent: 0,
+    topService: "-"
   },
   {
-    villageId: 'desa-kuantantenang',
-    villageName: 'Desa Kuantan Tenang',
-    totalRequests: 84,
-    completed: 78,
-    inProgress: 4,
-    revision: 2,
-    averageSlaHours: 5.4,
-    slaPerformancePercent: 93.8,
-    topService: 'Surat Keterangan Tidak Mampu (SKTM)'
+    villageId: "desa-kuantantenang",
+    villageName: "Desa Kuantan Tenang",
+    totalRequests: 0,
+    completed: 0,
+    inProgress: 0,
+    revision: 0,
+    averageSlaHours: 0,
+    slaPerformancePercent: 0,
+    topService: "-"
   },
   {
-    villageId: 'desa-petonggan',
-    villageName: 'Desa Petonggan',
-    totalRequests: 92,
-    completed: 84,
-    inProgress: 6,
-    revision: 2,
-    averageSlaHours: 4.9,
-    slaPerformancePercent: 94.2,
-    topService: 'Surat Pengantar Nikah (SPN)'
+    villageId: "desa-petonggan",
+    villageName: "Desa Petonggan",
+    totalRequests: 0,
+    completed: 0,
+    inProgress: 0,
+    revision: 0,
+    averageSlaHours: 0,
+    slaPerformancePercent: 0,
+    topService: "-"
   },
   {
-    villageId: 'desa-lubuksetarak',
-    villageName: 'Desa Lubuk Setarak',
-    totalRequests: 76,
-    completed: 70,
-    inProgress: 4,
-    revision: 2,
-    averageSlaHours: 5.6,
-    slaPerformancePercent: 91.0,
-    topService: 'Surat Keterangan Usaha (SKU)'
+    villageId: "desa-lubuksetarak",
+    villageName: "Desa Lubuk Setarak",
+    totalRequests: 0,
+    completed: 0,
+    inProgress: 0,
+    revision: 0,
+    averageSlaHours: 0,
+    slaPerformancePercent: 0,
+    topService: "-"
   },
   {
-    villageId: 'desa-rimbaseminai',
-    villageName: 'Desa Rimba Seminai',
-    totalRequests: 68,
-    completed: 62,
-    inProgress: 4,
-    revision: 2,
-    averageSlaHours: 5.8,
-    slaPerformancePercent: 90.2,
-    topService: 'Surat Keterangan Pindah (SKP)'
+    villageId: "desa-rimbaseminai",
+    villageName: "Desa Rimba Seminai",
+    totalRequests: 0,
+    completed: 0,
+    inProgress: 0,
+    revision: 0,
+    averageSlaHours: 0,
+    slaPerformancePercent: 0,
+    topService: "-"
   },
   {
-    villageId: 'desa-batusawar',
-    villageName: 'Desa Batu Sawar',
-    totalRequests: 64,
-    completed: 58,
-    inProgress: 4,
-    revision: 2,
-    averageSlaHours: 6.0,
-    slaPerformancePercent: 89.5,
-    topService: 'Surat Pengantar SKCK'
+    villageId: "desa-batusawar",
+    villageName: "Desa Batu Sawar",
+    totalRequests: 0,
+    completed: 0,
+    inProgress: 0,
+    revision: 0,
+    averageSlaHours: 0,
+    slaPerformancePercent: 0,
+    topService: "-"
   },
   {
-    villageId: 'desa-kampungbungo',
-    villageName: 'Desa Kampung Bungo',
-    totalRequests: 59,
-    completed: 54,
-    inProgress: 3,
-    revision: 2,
-    averageSlaHours: 6.2,
-    slaPerformancePercent: 88.9,
-    topService: 'Surat Keterangan Domisili'
+    villageId: "desa-kampungbungo",
+    villageName: "Desa Kampung Bungo",
+    totalRequests: 0,
+    completed: 0,
+    inProgress: 0,
+    revision: 0,
+    averageSlaHours: 0,
+    slaPerformancePercent: 0,
+    topService: "-"
   },
   {
-    villageId: 'desa-talangsukamaju',
-    villageName: 'Desa Talang Suka Maju',
-    totalRequests: 72,
-    completed: 66,
-    inProgress: 4,
-    revision: 2,
-    averageSlaHours: 5.2,
-    slaPerformancePercent: 92.0,
-    topService: 'Surat Pengantar Nikah (N1-N4)'
+    villageId: "desa-talangsukamaju",
+    villageName: "Desa Talang Suka Maju",
+    totalRequests: 0,
+    completed: 0,
+    inProgress: 0,
+    revision: 0,
+    averageSlaHours: 0,
+    slaPerformancePercent: 0,
+    topService: "-"
   },
   {
-    villageId: 'desa-talangparigi',
-    villageName: 'Desa Talang Parigi',
-    totalRequests: 55,
-    completed: 50,
-    inProgress: 3,
-    revision: 2,
-    averageSlaHours: 6.4,
-    slaPerformancePercent: 87.5,
-    topService: 'Surat Keterangan Usaha (SKU)'
+    villageId: "desa-talangparigi",
+    villageName: "Desa Talang Parigi",
+    totalRequests: 0,
+    completed: 0,
+    inProgress: 0,
+    revision: 0,
+    averageSlaHours: 0,
+    slaPerformancePercent: 0,
+    topService: "-"
   },
   {
-    villageId: 'desa-talangpringjaya',
-    villageName: 'Desa Talang Pring Jaya',
-    totalRequests: 62,
-    completed: 56,
-    inProgress: 4,
-    revision: 2,
-    averageSlaHours: 5.9,
-    slaPerformancePercent: 90.0,
-    topService: 'Surat Keterangan Tidak Mampu (SKTM)'
+    villageId: "desa-talangpringjaya",
+    villageName: "Desa Talang Pring Jaya",
+    totalRequests: 0,
+    completed: 0,
+    inProgress: 0,
+    revision: 0,
+    averageSlaHours: 0,
+    slaPerformancePercent: 0,
+    topService: "-"
   },
   {
-    villageId: 'desa-talangselantai',
-    villageName: 'Desa Talang Selantai',
-    totalRequests: 48,
-    completed: 43,
-    inProgress: 3,
-    revision: 2,
-    averageSlaHours: 6.6,
-    slaPerformancePercent: 86.8,
-    topService: 'Surat Pengantar SKCK'
+    villageId: "desa-talangselantai",
+    villageName: "Desa Talang Selantai",
+    totalRequests: 0,
+    completed: 0,
+    inProgress: 0,
+    revision: 0,
+    averageSlaHours: 0,
+    slaPerformancePercent: 0,
+    topService: "-"
   },
   {
-    villageId: 'desa-talangduriancacar',
-    villageName: 'Desa Talang Durian Cacar',
-    totalRequests: 52,
-    completed: 47,
-    inProgress: 3,
-    revision: 2,
-    averageSlaHours: 6.3,
-    slaPerformancePercent: 88.0,
-    topService: 'Surat Keterangan Usaha (SKU)'
+    villageId: "desa-talangduriancacar",
+    villageName: "Desa Talang Durian Cacar",
+    totalRequests: 0,
+    completed: 0,
+    inProgress: 0,
+    revision: 0,
+    averageSlaHours: 0,
+    slaPerformancePercent: 0,
+    topService: "-"
   },
   {
-    villageId: 'desa-talanggedabu',
-    villageName: 'Desa Talang Gedabu',
-    totalRequests: 46,
-    completed: 41,
-    inProgress: 3,
-    revision: 2,
-    averageSlaHours: 6.7,
-    slaPerformancePercent: 86.0,
-    topService: 'Surat Keterangan Domisili'
+    villageId: "desa-talanggedabu",
+    villageName: "Desa Talang Gedabu",
+    totalRequests: 0,
+    completed: 0,
+    inProgress: 0,
+    revision: 0,
+    averageSlaHours: 0,
+    slaPerformancePercent: 0,
+    topService: "-"
   },
   {
-    villageId: 'desa-talangsungailimau',
-    villageName: 'Desa Talang Sungai Limau',
-    totalRequests: 44,
-    completed: 39,
-    inProgress: 3,
-    revision: 2,
-    averageSlaHours: 6.8,
-    slaPerformancePercent: 85.5,
-    topService: 'Surat Pengantar Nikah (N1-N4)'
+    villageId: "desa-talangsungailimau",
+    villageName: "Desa Talang Sungai Limau",
+    totalRequests: 0,
+    completed: 0,
+    inProgress: 0,
+    revision: 0,
+    averageSlaHours: 0,
+    slaPerformancePercent: 0,
+    topService: "-"
   },
   {
-    villageId: 'desa-talangsungaiparit',
-    villageName: 'Desa Talang Sungai Parit',
-    totalRequests: 42,
-    completed: 38,
-    inProgress: 2,
-    revision: 2,
-    averageSlaHours: 6.5,
-    slaPerformancePercent: 87.0,
-    topService: 'Surat Keterangan Tidak Mampu'
+    villageId: "desa-talangsungaiparit",
+    villageName: "Desa Talang Sungai Parit",
+    totalRequests: 0,
+    completed: 0,
+    inProgress: 0,
+    revision: 0,
+    averageSlaHours: 0,
+    slaPerformancePercent: 0,
+    topService: "-"
   },
   {
-    villageId: 'desa-talang7buahtangga',
-    villageName: 'Desa Talang Tujuh Buah Tangga',
-    totalRequests: 40,
-    completed: 36,
-    inProgress: 2,
-    revision: 2,
-    averageSlaHours: 6.9,
-    slaPerformancePercent: 85.0,
-    topService: 'Surat Keterangan Usaha (SKU)'
+    villageId: "desa-talang7buahtangga",
+    villageName: "Desa Talang Tujuh Buah Tangga",
+    totalRequests: 0,
+    completed: 0,
+    inProgress: 0,
+    revision: 0,
+    averageSlaHours: 0,
+    slaPerformancePercent: 0,
+    topService: "-"
   },
   {
-    villageId: 'desa-sungaiekok',
-    villageName: 'Desa Sungai Ekok',
-    totalRequests: 38,
-    completed: 34,
-    inProgress: 2,
-    revision: 2,
-    averageSlaHours: 7.0,
-    slaPerformancePercent: 84.5,
-    topService: 'Surat Pengantar SKCK'
+    villageId: "desa-sungaiekok",
+    villageName: "Desa Sungai Ekok",
+    totalRequests: 0,
+    completed: 0,
+    inProgress: 0,
+    revision: 0,
+    averageSlaHours: 0,
+    slaPerformancePercent: 0,
+    topService: "-"
   }
 ];
 

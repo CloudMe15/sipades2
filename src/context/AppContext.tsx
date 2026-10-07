@@ -1,8 +1,9 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import {
   CitizenRequest,
   CurrentUser,
   DocumentAttachment,
+  RakitKulimVillage,
   RequestStatus,
   ServiceType,
   VillageStats,
@@ -13,6 +14,7 @@ import {
   INITIAL_WA_LOGS,
   MOCK_USERS,
   MOCK_VILLAGE_STATS,
+  RAKIT_KULIM_VILLAGES,
   SERVICE_METAS
 } from '../data/mockData';
 
@@ -86,6 +88,7 @@ interface AppContextType {
   recordHandover: (requestId: string, handoverData: NonNullable<CitizenRequest['handover']>) => void;
   deleteRequest: (requestId: string) => void;
   resetToSampleData: () => void;
+  clearComparisonData: () => Promise<void>;
   downloadDocument: (fileUrl: string, fileName: string) => Promise<void>;
   downloadAllDocuments: (req: CitizenRequest) => Promise<void>;
   exportRequestsToCsv: (customRequests?: CitizenRequest[]) => void;
@@ -106,6 +109,18 @@ interface AppContextType {
   // Stats
   villageStats: VillageStats[];
 
+  // Villages & Kepala Desa Management (Super Admin)
+  villages: RakitKulimVillage[];
+  updateVillageKades: (villageId: string, newKadesName: string, phone?: string) => Promise<boolean>;
+  resetVillagesToDefault: () => void;
+  manageVillagesModalOpen: boolean;
+  setManageVillagesModalOpen: (open: boolean) => void;
+
+  // Manual Signed Document Upload & Preview
+  uploadManualSignedFile: (requestId: string, fileUrl: string, fileName: string, markComplete?: boolean) => void;
+  previewSignedDoc: { url: string; name: string; request?: CitizenRequest } | null;
+  setPreviewSignedDoc: (doc: { url: string; name: string; request?: CitizenRequest } | null) => void;
+
   // Active view modals
   selectedRequest: CitizenRequest | null;
   setSelectedRequest: (req: CitizenRequest | null) => void;
@@ -124,7 +139,8 @@ const STORAGE_KEYS = {
   WA_LOGS: 'sipades_wa_logs_v1',
   ACTIVE_USER: 'sipades_active_user_v1',
   GATEWAY_CONFIG: 'sipades_gateway_config_v1',
-  USERS: 'sipades_users_v1'
+  USERS: 'sipades_users_v1',
+  VILLAGES: 'sipades_villages_kades_v1'
 };
 
 const DEFAULT_WA_CONFIG: WaGatewayConfig = {
@@ -186,10 +202,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [requests, setRequests] = useState<CitizenRequest[]>(() => {
+    // Reset test storage cache so tester starts with clean 0 requests
+    const resetMarker = localStorage.getItem('sipades_empty_test_v3');
+    if (!resetMarker) {
+      localStorage.removeItem(STORAGE_KEYS.REQUESTS);
+      localStorage.setItem('sipades_empty_test_v3', 'true');
+      return [];
+    }
     const saved = localStorage.getItem(STORAGE_KEYS.REQUESTS);
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
       } catch (e) {
         console.error(e);
       }
@@ -221,7 +245,80 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return DEFAULT_WA_CONFIG;
   });
 
-  const [villageStats] = useState<VillageStats[]>(MOCK_VILLAGE_STATS);
+  // Komparasi Pelayanan Antar-Desa dihitung dinamis dari data pengujian permohonan nyata
+  const villageStats: VillageStats[] = useMemo(() => {
+    return MOCK_VILLAGE_STATS.map(v => {
+      const normalizedName = v.villageName.toLowerCase().replace(/\s*\(.*\)/, '').trim();
+      const villageRequests = requests.filter(r => {
+        const reqDesa = (r.desa || '').toLowerCase();
+        return reqDesa.includes(normalizedName) || normalizedName.includes(reqDesa);
+      });
+
+      const total = villageRequests.length;
+      if (total === 0) {
+        return {
+          ...v,
+          totalRequests: 0,
+          completed: 0,
+          inProgress: 0,
+          revision: 0,
+          averageSlaHours: 0,
+          slaPerformancePercent: 0,
+          topService: '-'
+        };
+      }
+
+      const completedReqs = villageRequests.filter(
+        r => r.status === 'selesai_siap_ambil' || r.status === 'sudah_diambil'
+      );
+      const revision = villageRequests.filter(r => r.status === 'butuh_perbaikan').length;
+      const inProgress = villageRequests.filter(
+        r => ['menunggu_verifikasi', 'diproses', 'menunggu_ttd_kades'].includes(r.status)
+      ).length;
+
+      const completedWithSla = completedReqs.filter(r => typeof r.slaActualHours === 'number' && r.slaActualHours > 0);
+      const avgSla = completedWithSla.length > 0
+        ? parseFloat((completedWithSla.reduce((sum, r) => sum + (r.slaActualHours || 0), 0) / completedWithSla.length).toFixed(1))
+        : 0;
+
+      const slaPercent = total > 0 ? Math.round((completedReqs.length / total) * 100) : 0;
+
+      const serviceCounts: Record<string, number> = {};
+      villageRequests.forEach(r => {
+        const svc = r.serviceType || 'SKU';
+        serviceCounts[svc] = (serviceCounts[svc] || 0) + 1;
+      });
+      let topSvc = '-';
+      let maxCount = 0;
+      Object.entries(serviceCounts).forEach(([k, c]) => {
+        if (c > maxCount) {
+          maxCount = c;
+          topSvc = k;
+        }
+      });
+
+      const serviceNames: Record<string, string> = {
+        SKU: 'Surat Keterangan Usaha (SKU)',
+        SKTM: 'Surat Keterangan Tidak Mampu (SKTM)',
+        SKCK: 'Surat Pengantar SKCK',
+        SKD: 'Surat Keterangan Domisili (SKD)',
+        SKP: 'Surat Keterangan Pindah (SKP)',
+        SPN: 'Surat Pengantar Nikah (SPN)',
+        SKK: 'Surat Keterangan Kematian/Kelahiran'
+      };
+
+      return {
+        ...v,
+        totalRequests: total,
+        completed: completedReqs.length,
+        inProgress,
+        revision,
+        averageSlaHours: avgSla,
+        slaPerformancePercent: slaPercent,
+        topService: serviceNames[topSvc] || topSvc
+      };
+    });
+  }, [requests]);
 
   // Modals state
   const [selectedRequest, setSelectedRequest] = useState<CitizenRequest | null>(null);
@@ -231,8 +328,59 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [adminApprovalModalOpen, setAdminApprovalModalOpen] = useState(false);
   const [resetPasswordModalOpen, setResetPasswordModalOpen] = useState(false);
+  const [manageVillagesModalOpen, setManageVillagesModalOpen] = useState(false);
 
-  // Active OTP codes for reset password & email verification (in-memory + simulation)
+  // Daftar 19 Desa & Nama Kepala Desa (Dapat diubah oleh Super Admin)
+  const [villages, setVillages] = useState<RakitKulimVillage[]>(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.VILLAGES);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return RAKIT_KULIM_VILLAGES;
+  });
+
+  const updateVillageKades = async (villageId: string, newKadesName: string, phone?: string): Promise<boolean> => {
+    const cleanKades = newKadesName.trim();
+    if (!cleanKades) return false;
+
+    setVillages(prev => {
+      const updated = prev.map(v => {
+        if (v.id === villageId || v.name.toLowerCase() === villageId.toLowerCase()) {
+          return {
+            ...v,
+            kades: cleanKades,
+            phone: phone !== undefined && phone.trim() ? phone.trim() : v.phone
+          };
+        }
+        return v;
+      });
+      try {
+        localStorage.setItem(STORAGE_KEYS.VILLAGES, JSON.stringify(updated));
+      } catch (e) {
+        console.error(e);
+      }
+      return updated;
+    });
+
+    return true;
+  };
+
+  const resetVillagesToDefault = () => {
+    setVillages(RAKIT_KULIM_VILLAGES);
+    try {
+      localStorage.removeItem(STORAGE_KEYS.VILLAGES);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  // Preview Modal untuk Berkas yang Sudah Ditandatangani Manual
+  const [previewSignedDoc, setPreviewSignedDoc] = useState<{ url: string; name: string; request?: CitizenRequest } | null>(null);
   const [resetOtps, setResetOtps] = useState<Record<string, { code: string; expiresAt: number; email: string }>>({});
   const [regOtps, setRegOtps] = useState<Record<string, { code: string; expiresAt: number }>>({});
 
@@ -600,9 +748,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const deleteUser = async (userId: string): Promise<boolean> => {
-    setUsers(prev => prev.filter(u => u.id !== userId));
+    // 1. Hapus dari state pengguna & simpan ke local storage
+    setUsers(prev => {
+      const filtered = prev.filter(u => u.id !== userId && u.username !== userId);
+      try {
+        localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(filtered));
+      } catch (e) {
+        console.error(e);
+      }
+      return filtered;
+    });
+
+    // 2. Jika akun yang dihapus sedang login, segera logout
+    if (currentUser?.id === userId || currentUser?.username === userId) {
+      logout();
+    }
+
+    // 3. Kirim perintah hapus permanen ke API server & MySQL database
     try {
-      await fetch(`/api/users.php?action=delete&id=${userId}`, { method: 'POST' });
+      await fetch(`/api/users.php?action=delete&id=${encodeURIComponent(userId)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete', id: userId, userId })
+      });
     } catch (err) {
       console.error('Delete user error:', err);
     }
@@ -1054,17 +1222,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
         // Attach scanned completed doc
         const defaultDocUrl = 'https://placehold.co/600x800/065f46/ffffff?text=SURAT+RESMI+TERTANDATANGANI+KADES+%2B+CAP+DESA';
+        const finalDocUrl = scanDocUrl || defaultDocUrl;
+        const finalDocName = scanDocName || `Scan_Surat_${r.serviceType}_${r.namaLengkap.replace(/\s+/g, '_')}_Signed.pdf`;
+        const villageItem = villages.find(v => v.name.toLowerCase() === (r.desa || '').toLowerCase());
+        const kadesName = villageItem?.kades || 'Kepala Desa';
+
         const scanAttachment: DocumentAttachment = {
           id: `att-scan-${Date.now()}`,
           type: 'surat_selesai_scan',
-          name: scanDocName || `Scan_Surat_${r.serviceType}_${r.namaLengkap.replace(/\s+/g, '_')}_Signed.pdf`,
-          fileUrl: scanDocUrl || defaultDocUrl,
+          name: finalDocName,
+          fileUrl: finalDocUrl,
           uploadedAt: timestamp,
           uploadedBy: currentUser ? `${currentUser.name} (Operator)` : 'Petugas Operator Desa',
           status: 'valid'
         };
 
-        const updatedAttachments: DocumentAttachment[] = [...r.attachments, scanAttachment];
+        const updatedAttachments: DocumentAttachment[] = [
+          ...r.attachments.filter(a => a.type !== 'surat_selesai_scan'),
+          scanAttachment
+        ];
 
         // Sync to backend
         fetch('/api/requests.php?action=complete', {
@@ -1075,6 +1251,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             completedAt: timestamp,
             slaActualHours: 4.5,
             scanAttachment,
+            isManuallySigned: true,
+            signedDocumentUrl: finalDocUrl,
+            signedDocumentName: finalDocName,
+            signedAt: timestamp,
+            signedByKadesName: kadesName,
             updatedAt: timestamp,
             timelineEvent: newTimelineEvent
           })
@@ -1088,15 +1269,84 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           dispatchWaNotification(r.nomorWhatsapp, r.namaLengkap, r.ticketNumber, 'SIAP_DIAMBIL', waMsg);
         }
 
-        return {
+        const updatedRequest = {
           ...r,
-          status: 'selesai_siap_ambil',
+          status: 'selesai_siap_ambil' as RequestStatus,
           attachments: updatedAttachments,
+          isManuallySigned: true,
+          signedDocumentUrl: finalDocUrl,
+          signedDocumentName: finalDocName,
+          signedAt: timestamp,
+          signedByKadesName: kadesName,
           completedAt: timestamp,
           slaActualHours: 4.5,
           updatedAt: timestamp,
           timeline: [...r.timeline, newTimelineEvent]
         };
+
+        setSelectedRequest(prev => prev && prev.id === requestId ? updatedRequest : prev);
+
+        return updatedRequest;
+      })
+    );
+  };
+
+  const uploadManualSignedFile = (requestId: string, fileUrl: string, fileName: string, markComplete: boolean = false) => {
+    if (markComplete) {
+      operatorCompleteRequest(requestId, fileUrl, fileName);
+      return;
+    }
+
+    const timestamp = getFormattedNow();
+    setRequests(prev =>
+      prev.map(r => {
+        if (r.id !== requestId) return r;
+
+        const villageItem = villages.find(v => v.name.toLowerCase() === (r.desa || '').toLowerCase());
+        const kadesName = villageItem?.kades || 'Kepala Desa';
+
+        const scanAttachment: DocumentAttachment = {
+          id: `att-scan-${Date.now()}`,
+          type: 'surat_selesai_scan',
+          name: fileName,
+          fileUrl: fileUrl,
+          uploadedAt: timestamp,
+          uploadedBy: currentUser ? `${currentUser.name} (${currentUser.identifier})` : 'Petugas Pelayanan',
+          status: 'valid'
+        };
+
+        const newTimelineEvent = {
+          id: `t-${Date.now()}`,
+          status: r.status,
+          timestamp,
+          actor: currentUser ? `${currentUser.name}` : 'Petugas Pelayanan',
+          role: currentUser?.role || 'operator',
+          note: `Berkas scan hasil tanda tangan manual Kepala Desa (${kadesName}) berhasil diunggah (${fileName}).`
+        };
+
+        const updatedAttachments = [
+          ...r.attachments.filter(a => a.type !== 'surat_selesai_scan'),
+          scanAttachment
+        ];
+
+        const updatedRequest = {
+          ...r,
+          attachments: updatedAttachments,
+          isManuallySigned: true,
+          signedDocumentUrl: fileUrl,
+          signedDocumentName: fileName,
+          signedAt: timestamp,
+          signedByKadesName: kadesName,
+          updatedAt: timestamp,
+          timeline: [...r.timeline, newTimelineEvent]
+        };
+
+        setSelectedRequest(prev => prev && prev.id === requestId ? updatedRequest : prev);
+
+        return updatedRequest;
+      })
+    );
+  };
       })
     );
   };
@@ -1189,16 +1439,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }).catch(err => console.error('Delete sync error:', err));
   };
 
+  const clearComparisonData = async () => {
+    setRequests([]);
+    localStorage.removeItem(STORAGE_KEYS.REQUESTS);
+    try {
+      await fetch('/api/requests.php?action=clear_all', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'clear_all' })
+      });
+    } catch (err) {
+      console.error('Clear comparison error:', err);
+    }
+  };
+
   const resetToSampleData = () => {
-    setRequests(INITIAL_REQUESTS);
-    setWaLogs(INITIAL_WA_LOGS);
+    setRequests([]);
+    setWaLogs([]);
     localStorage.removeItem(STORAGE_KEYS.REQUESTS);
     localStorage.removeItem(STORAGE_KEYS.WA_LOGS);
 
-    fetch('/api/requests.php?action=sync_all', {
+    fetch('/api/requests.php?action=clear_all', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ requests: INITIAL_REQUESTS })
+      body: JSON.stringify({ action: 'clear_all' })
     }).catch(err => console.error('Reset sync error:', err));
   };
 
@@ -1252,11 +1516,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         recordHandover,
         deleteRequest,
         resetToSampleData,
+        clearComparisonData,
         waLogs,
         waGatewayConfig,
         updateWaGatewayConfig,
         sendManualWhatsApp,
         villageStats,
+        villages,
+        updateVillageKades,
+        resetVillagesToDefault,
+        manageVillagesModalOpen,
+        setManageVillagesModalOpen,
+        uploadManualSignedFile,
+        previewSignedDoc,
+        setPreviewSignedDoc,
         selectedRequest,
         setSelectedRequest,
         letterModalRequest,

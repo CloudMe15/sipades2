@@ -286,6 +286,19 @@ if ($method === 'POST') {
         saveLocalFallbackRequests($body['requests']);
         jsonResponse(['success' => true, 'message' => 'Seluruh data tersinkronisasi ke server.']);
     }
+
+    // E. Aksi: Kosongkan Seluruh Data untuk Pengujian Baru (Reset)
+    if ($action === 'clear_all') {
+        if ($dbConnected && $pdo) {
+            try {
+                $pdo->exec("DELETE FROM attachments");
+                $pdo->exec("DELETE FROM timelines");
+                $pdo->exec("DELETE FROM requests");
+            } catch (Exception $e) {}
+        }
+        saveLocalFallbackRequests([]);
+        jsonResponse(['success' => true, 'message' => 'Semua data permohonan berhasil dikosongkan untuk pengujian baru.']);
+    }
 }
 
 jsonResponse(['success' => false, 'message' => 'Aksi tidak dikenali.'], 400);
