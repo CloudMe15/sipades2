@@ -193,7 +193,9 @@ export const CompletionUploadView: React.FC = () => {
                 <input
                   type="file"
                   accept="image/*,application/pdf"
-                  ref={el => (fileInputRefs.current[req.id] = el)}
+                  ref={el => {
+                    fileInputRefs.current[req.id] = el;
+                  }}
                   onChange={e => handleFileInputChange(req, e)}
                   className="hidden"
                 />

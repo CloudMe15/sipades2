@@ -21,7 +21,15 @@ import {
 } from 'lucide-react';
 
 export const KecamatanDashboard: React.FC = () => {
-  const { villageStats, requests, currentUser, users, setAdminApprovalModalOpen, clearComparisonData } = useApp();
+  const {
+    villageStats,
+    requests,
+    currentUser,
+    users,
+    setAdminApprovalModalOpen,
+    clearComparisonData,
+    setManageVillagesModalOpen
+  } = useApp();
 
   const [selectedVillage, setSelectedVillage] = useState<string>('all');
   const [selectedMonth, setSelectedMonth] = useState('Oktober 2026');
@@ -95,6 +103,14 @@ export const KecamatanDashboard: React.FC = () => {
           </div>
 
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <button
+              onClick={() => setManageVillagesModalOpen(true)}
+              className="px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs flex items-center gap-2 border border-white/20 transition cursor-pointer"
+              title="Kelola 19 Desa dan Nama Kepala Desa se-Kecamatan Rakit Kulim"
+            >
+              <Building2 className="w-3.5 h-3.5" />
+              <span>Kelola 19 Desa & Kades</span>
+            </button>
             <button
               onClick={handleResetForTesting}
               disabled={isResetting}

@@ -17,6 +17,8 @@ import { WhatsAppGatewayModal } from './components/modals/WhatsAppGatewayModal';
 import { ProfileModal } from './components/modals/ProfileModal';
 import { AdminApprovalModal } from './components/modals/AdminApprovalModal';
 import { ResetPasswordModal } from './components/modals/ResetPasswordModal';
+import { SignedDocumentViewerModal } from './components/modals/SignedDocumentViewerModal';
+import { ManageVillagesModal } from './components/modals/ManageVillagesModal';
 
 const MainContent: React.FC = () => {
   const { currentUser } = useApp();
@@ -30,6 +32,7 @@ const MainContent: React.FC = () => {
         <PublicVerificationModal />
         <WhatsAppGatewayModal />
         <ResetPasswordModal />
+        <SignedDocumentViewerModal />
       </>
     );
   }
@@ -54,6 +57,8 @@ const MainContent: React.FC = () => {
       <ProfileModal />
       <AdminApprovalModal />
       <ResetPasswordModal />
+      <SignedDocumentViewerModal />
+      <ManageVillagesModal />
     </div>
   );
 };

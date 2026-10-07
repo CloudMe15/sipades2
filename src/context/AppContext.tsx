@@ -1347,9 +1347,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       })
     );
   };
-      })
-    );
-  };
 
   const rtSubmitRevision = (requestId: string, updatedAttachments: DocumentAttachment[], note?: string) => {
     const timestamp = getFormattedNow();

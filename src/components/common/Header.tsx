@@ -31,7 +31,8 @@ export const Header: React.FC = () => {
     newNotification,
     clearNotification,
     setProfileModalOpen,
-    setAdminApprovalModalOpen
+    setAdminApprovalModalOpen,
+    setManageVillagesModalOpen
   } = useApp();
 
   const [timeStr, setTimeStr] = useState('');
@@ -276,6 +277,19 @@ export const Header: React.FC = () => {
                                 {users.filter(u => u.status === 'pending').length}
                               </span>
                             )}
+                          </button>
+                        )}
+
+                        {(currentUser.role === 'admin' || currentUser.role === 'kecamatan') && (
+                          <button
+                            onClick={() => {
+                              setManageVillagesModalOpen(true);
+                              setDropdownOpen(false);
+                            }}
+                            className="w-full py-2 px-3 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-900 text-xs font-bold transition flex items-center gap-2 cursor-pointer border border-purple-200 shadow-2xs"
+                          >
+                            <Building2 className="w-4 h-4 text-purple-700" />
+                            <span>Kelola 19 Desa & Kades</span>
                           </button>
                         )}
 
